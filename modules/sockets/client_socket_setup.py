@@ -4,7 +4,7 @@ import os
 
 #Constants
 HOST = "127.0.0.1"
-PORT = 9999
+PORT = 1337
 
 #Function: instantiate socket and connect
 def connect_to_server(host, port):
