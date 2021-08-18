@@ -2,6 +2,9 @@
 import socket
 import os
 
+#Import of any in house modules
+from modules.sockets.socket_data_transfer import sendSocketData, receiveSocketData
+
 #Constants
 HOST = "127.0.0.1"
 PORT = 1337
@@ -21,14 +24,15 @@ def data_transfer():
   s = connect_to_server(HOST, PORT)
   #Loop to look for data
   while True:
-    s.send(bytes(" ","utf-8")) #Empty string to establish target
-    data = s.recv(20480)
+    data = receiveSocketData(s)
 
-    print(data.decode())
+    print(data)
     
-    if data.decode() == 'dataone':
-      string1 = ("Hello this is string one")
-      s.send(str.encode(string1))
-    if data.decode() == 'datatwo':
-      string2 = ("Hello this is string two")
-      s.send(str.encode(string2))
+    if data == 'dataone':
+      string1 = "Hello this is string one"
+      sendSocketData(s, string1)
+    if data == 'datatwo':
+      string2 = "Hello this is string two"
+      sendSocketData(s, string2)
+    if data == 'PINGING':
+      sendSocketData(s, " ")
