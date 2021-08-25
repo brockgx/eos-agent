@@ -5,7 +5,6 @@ import OpenGL.GL as gl
 
 import imgui
 from imgui.integrations.sdl2 import SDL2Renderer
-from testwindow import show_test_window
 
 import psutil
 
@@ -90,6 +89,8 @@ class application:
         self.name = name
         self.cpu = cpu
         self.ram = ram
+    def to_dict(self):
+        return {"name": self.name, "cpu": self.cpu, "ram": self.ram}
 
 ###############
 ## SYSTEM CLASS
@@ -119,7 +120,7 @@ import time
 ###############
 
 
-def thread_application_metrics(test):
+def thread_application_metrics():
     global list_current_processes
     global list_current_processes_show
     while(True):
@@ -148,12 +149,13 @@ def thread_system_metrics():
 
 def get_list_of_processes(list_processes):
     process_iter = psutil.process_iter()
+    cpu_count = psutil.cpu_count()
     for proc in process_iter:
         try:
             exe_path = proc.exe()
             process_name = proc.name()
             if ".exe" in process_name:
-                list_processes.append(application(process_name, proc.cpu_percent(), proc.memory_info().rss))
+                list_processes.append(application(process_name, round(proc.cpu_percent()/cpu_count,2), round(proc.memory_percent(),2)))
 
             
         #print(process_name , ' ::: ', processID)
@@ -173,13 +175,16 @@ from datetime import datetime
 ###############
 
 
-def get_json(list):
+def get_json():
     now = datetime.now()
+    app_metrics = []
+    for i in range(5):
+        app_metrics.append(list_current_processes_show[i].to_dict())
     x = {
-        "machine_name": get_hostname(),
+        "machine_name": socket.gethostname(),
         "collection_time": now.strftime("%m/%d/%Y, %H:%M:%S"),
-        "app_metrics": [{"name":list[0].name, "cpu_usage": list[0].cpu, "ram_usage": list[0].ram}],
-        "system_metrics": [{"cpu":psutil.cpu_percent()}, {"ram":psutil.virtual_memory().percent}]
+        "app_metrics": app_metrics,
+        "system_metrics": [{"cpu":system_metrics.cpu}, {"ram":system_metrics.ram}]
     }
     return json.dumps(x)
 
@@ -230,7 +235,7 @@ def main():
     ###############
     
     application_thread = threading.Thread(target = thread_application_metrics).start()
-    application_thread.start()
+    system_thread = threading.Thread(target = thread_system_metrics).start()
     
     #time.sleep(1)
     
@@ -267,7 +272,6 @@ def main():
                 imgui.end_menu()
             imgui.end_main_menu_bar()
 
-        show_test_window()
         #imgui.show_test_window()
         imgui.push_font(font1)
         imgui.begin("Custom window", True)
@@ -318,7 +322,8 @@ def main():
         ###############
         
         if imgui.button("Get Json"):
-            json_output = get_json(list_current_processes_show)
+            json_output = get_json()
+            print(json_output)
 
         imgui.text_wrapped(json_output)
         if system_metrics is not None:
