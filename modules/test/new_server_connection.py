@@ -36,10 +36,8 @@ def data_transfer():
     if cmd == "getdata" or cmd == "getmessage":
       sendSocketData(s, cmd)
       time.sleep(2)
-      print("Sent data")
       client_response = receiveSocketData(s)
       print(client_response)
-      print("Got data")
       break
     if cmd == "ping":
       sendSocketData(s, "PINGING")

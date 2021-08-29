@@ -32,7 +32,7 @@ def sendSocketData(socketConn, message):
 #Function: receive data
 def receiveSocketData(socketConn):
   #function variables
-  receieved_msg = "EMPTY"
+  #receieved_msg = "EMPTY"
   receive_msg = True
   new_msg = True
   length_msg = True
@@ -45,14 +45,11 @@ def receiveSocketData(socketConn):
     except:
       receive_msg = False
 
-    print("Got something")
     if new_msg:
       length_msg = int(msg[:HEADERSIZE])
       new_msg = False
-      print("New msg")
         
     complete_msg += msg
-    print(complete_msg)
       
     if len(complete_msg)-HEADERSIZE == length_msg:
       #Do something with the data - print example
