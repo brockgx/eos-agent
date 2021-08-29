@@ -3,7 +3,7 @@ import pickle
 import time
 
 #import personal libraries
-from ..security.AESEncryption import serialize
+#from ..security.AESEncryption import serialize
 
 #Constants
 HEADERSIZE = 10
@@ -32,24 +32,31 @@ def sendSocketData(socketConn, message):
 #Function: receive data
 def receiveSocketData(socketConn):
   #function variables
+  receieved_msg = "EMPTY"
   receive_msg = True
   new_msg = True
+  length_msg = True
   complete_msg = b''
 
   while receive_msg:
     try:
       msg = socketConn.recv(RECVSIZE)
+      print("Received")
     except:
       receive_msg = False
-    
+
+    print("Got something")
     if new_msg:
       length_msg = int(msg[:HEADERSIZE])
       new_msg = False
-
+      print("New msg")
+        
     complete_msg += msg
-
+    print(complete_msg)
+      
     if len(complete_msg)-HEADERSIZE == length_msg:
       #Do something with the data - print example
+      print("Full msg")
       receieved_msg = complete_msg[HEADERSIZE:].decode("utf-8")
       #print("Doneski")
       #print(receieved_msg)
@@ -65,5 +72,5 @@ def receiveSocketData(socketConn):
       new_msg = True
       complete_msg = ''
       receive_msg = False
-  
+        
   return receieved_msg
