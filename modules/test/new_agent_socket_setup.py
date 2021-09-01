@@ -83,7 +83,7 @@ def run_agent(sock):
       string1 = "Hello this is string one"
       sendSocketData(sock, string1)
     if data == 'PINGING':
-      sendSocketData(s, "I'm Alive")
+      sendSocketData(sock, "I'm Alive")
 
 #Run this for threading
 def setup_agent_sockets():

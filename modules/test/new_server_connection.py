@@ -20,31 +20,33 @@ def connect_to_server(host, port):
   sock = socket.socket()
   sock.connect((host,int(portmanual)))
 
-  return sock
+  return (sock,portmanual)
 
 #Receive/Send Data
 def data_transfer():
-  s = connect_to_server(HOST, PORT)
-  selection_data = ["Message 1", "Message 2", "Message 3"]
-  number = 3
-  #Loop to look for data
+
 
   print("You connected to the socket")
   while True:
-    cmd = input("> ")
+    s = connect_to_server(HOST, PORT)
+    print(f"You connected to the socket on port: {s[1]}")
 
-    if cmd == "getdata" or cmd == "getmessage":
-      sendSocketData(s, cmd)
-      time.sleep(2)
-      client_response = receiveSocketData(s)
-      print(client_response)
-      break
-    if cmd == "ping":
-      sendSocketData(s, "PINGING")
-      time.sleep(2)
-      client_response = receiveSocketData(s)
-      print(client_response)
-      break
+    while True:
+      cmd = input(f"[{HOST} : {s[1]}]> ")
+
+      if cmd == "getdata" or cmd == "getmessage":
+        sendSocketData(s[0], cmd)
+        time.sleep(2)
+        client_response = receiveSocketData(s[0])
+        print(client_response)
+      if cmd == "ping":
+        sendSocketData(s[0], "PINGING")
+        time.sleep(2)
+        client_response = receiveSocketData(s[0])
+        print(client_response)
+      if cmd == 'exit':
+        print
+        break
 
       
 

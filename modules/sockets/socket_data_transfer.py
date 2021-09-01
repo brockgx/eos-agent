@@ -41,33 +41,30 @@ def receiveSocketData(socketConn):
   while receive_msg:
     try:
       msg = socketConn.recv(RECVSIZE)
-      print("Received")
     except:
       receive_msg = False
 
-    if new_msg:
-      length_msg = int(msg[:HEADERSIZE])
-      new_msg = False
+    if msg != b'':
+      if new_msg:
+        length_msg = int(msg[:HEADERSIZE])
+        new_msg = False
         
-    complete_msg += msg
+      complete_msg += msg
       
-    if len(complete_msg)-HEADERSIZE == length_msg:
-      #Do something with the data - print example
-      print("Full msg")
-      receieved_msg = complete_msg[HEADERSIZE:].decode("utf-8")
-      #print("Doneski")
-      #print(receieved_msg)
+      if len(complete_msg)-HEADERSIZE == length_msg:
+        #Do something with the data - print example
+        receieved_msg = complete_msg[HEADERSIZE:].decode("utf-8")
 
-      #Decrypt here
-      #my_msg = receieved_msg[2:][:-1]
-      #print(my_msg)
-      #byte_msg = my_msg.encode()
-      #print(byte_msg)
-      #deserialized = pickle.loads(byte_msg)
+        #Decrypt here
+        #my_msg = receieved_msg[2:][:-1]
+        #print(my_msg)
+        #byte_msg = my_msg.encode()
+        #print(byte_msg)
+        #deserialized = pickle.loads(byte_msg)
 
 
-      new_msg = True
-      complete_msg = ''
-      receive_msg = False
+        new_msg = True
+        complete_msg = ''
+        receive_msg = False
         
   return receieved_msg
