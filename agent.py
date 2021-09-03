@@ -8,5 +8,7 @@ if cmd == "0":
     create_jobs()
 elif cmd == "1":
     newCreateSockets()
+    while True:
+        pass
 else:
     print("No command")

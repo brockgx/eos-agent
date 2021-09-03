@@ -47,12 +47,9 @@ def configureSocket(socketIp, socketPort):
 #Returned:
 #   - None
 def createNewThread(targetFunction, targetArgs = ()):
-  print("Setting up thread " + str(targetArgs[0]))
   agentThread = threading.Thread(target=targetFunction, args=targetArgs)
   agentThread.daemon = True
-  print("Starting thread " + str(targetArgs[0]))
   agentThread.start()
-  print(agentThread)
 
 
 #Function: Accepting new connections to the sockets
@@ -69,20 +66,15 @@ def acceptNewConnections(agentSocket):
 
   try:
     while True:
-      print(agentSocket)
       serverSocket, serverAddress = agentSocket.accept()
       agentSocket.setblocking(1)
-
-      print(serverSocket)
     
       allSocketConnections.append(serverSocket)
       allSocketConnectionAddresses.append(serverAddress)
       print(f"Connection from {serverAddress} has been established!")
 
-      print("Here")
-
       #Start a new thread once a connection occurs to run commands
-      #createNewThread(runAgentCommands, (serverSocket,))
+      createNewThread(runAgentCommands, (serverSocket,))
   except Exception as errMsg:
     print("[Error] Message: " + str(errMsg))
 
@@ -108,16 +100,11 @@ def runAgentCommands(agentSocket):
 
 def setupAgentSocket(socketNum):
   newSocket = configureSocket(AGENT_SOCKET_DETAILS['AGENT_IP'], AGENT_SOCKET_DETAILS['AGENT_PORTS'][socketNum])
-  print("Setting up new connections")
   acceptNewConnections(newSocket)
-  print("Done setting up new connections")
 
 def createSockets():
   for i in range(NUM_OF_SOCKET_LISTENERS):
     createNewThread(setupAgentSocket, (i,))
-    time.sleep(5)
-    print("Done setting up socket " + str(i))
-  print("Done")
 
 
 #JUST A TEST FUNCTION
