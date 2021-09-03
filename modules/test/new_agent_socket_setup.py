@@ -61,9 +61,9 @@ def accept_new_connections(soc):
       print(f"Connection from {address} has been established!")
 
       #Start a new thread
-      #t = threading.Thread(target=run_agent, args=(clientsocket,))
-      #t.daemon = True
-      #t.start()
+      t = threading.Thread(target=run_agent, args=(clientsocket,))
+      t.daemon = True
+      t.start()
   
   except:
     print("Error accepting new connection")
