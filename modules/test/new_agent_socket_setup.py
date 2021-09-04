@@ -113,5 +113,3 @@ def create_jobs():
 
   queue.join()
 
-createSockets()
-create_jobs()
