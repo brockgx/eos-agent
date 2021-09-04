@@ -3,7 +3,7 @@ import pickle
 import time
 
 #import personal libraries
-#from ..security.AESEncryption import serialize
+from ..security.AESEncryption import serialize, decryption
 
 #Constants
 HEADERSIZE = 10
@@ -41,30 +41,36 @@ def receiveSocketData(socketConn):
   while receiveMsg:
     try:
       msg = socketConn.recv(RECVSIZE)
-    except:
+      print(msg)
+      des_msg = pickle.loads(msg)
+      print(des_msg)
+      dec_msg = decryption(des_msg[1])
+      print(dec_msg)
+    except Exception as errMsg:
+      print("Error: " + str(errMsg))
       receiveMsg = False
 
-    if msg != b'':
-      if newMsg:
-        lengthMsg = int(msg[:HEADERSIZE])
-        newMsg = False
+  #   if msg != b'':
+  #     if newMsg:
+  #       lengthMsg = int(msg[:HEADERSIZE])
+  #       newMsg = False
         
-      completeMsg += msg
+  #     completeMsg += msg
       
-      if len(completeMsg)-HEADERSIZE == lengthMsg:
-        #Do something with the data - print example
-        receievedMsg = completeMsg[HEADERSIZE:].decode("utf-8")
+  #     if len(completeMsg)-HEADERSIZE == lengthMsg:
+  #       #Do something with the data - print example
+  #       receievedMsg = completeMsg[HEADERSIZE:].decode("utf-8")
 
-        #Decrypt here
-        #my_msg = receieved_msg[2:][:-1]
-        #print(my_msg)
-        #byte_msg = my_msg.encode()
-        #print(byte_msg)
-        #deserialized = pickle.loads(byte_msg)
+  #       #Decrypt here
+  #       #my_msg = receieved_msg[2:][:-1]
+  #       #print(my_msg)
+  #       #byte_msg = my_msg.encode()
+  #       #print(byte_msg)
+  #       #deserialized = pickle.loads(byte_msg)
 
 
-        newMsg = True
-        completeMsg = ''
-        receiveMsg = False
+  #       newMsg = True
+  #       completeMsg = ''
+  #       receiveMsg = False
         
-  return receievedMsg
+  # return receievedMsg

@@ -33,7 +33,7 @@ def do_encrypt(msg):
     Key = str(RandomKey())
 
     try:
-        KeyFile = open("/home/devmain/uni-work/app-resources/eos-app/server/modules/security/PassIV","r")
+        KeyFile = open("/home/devmain/uni-work/agent-resources/eos-agent/modules/security/PassIV","r")
     except IOError as err:
         print(err)
     KeyFileLines = KeyFile.read().splitlines()
@@ -42,12 +42,8 @@ def do_encrypt(msg):
     KeyFile.close()
 
     KeyObj = AES.new(KeyForEncryptionOfKey, AES.MODE_CFB, IVForEncryptionOfIV)
-    Keyphrase = bytes(Key + "," + fileSecret,"UTF-8")
+    Keyphrase = Key + "," + fileSecret
     cipherkeys = KeyObj.encrypt(Keyphrase)
-
-
-    testKeyObj = AES.new(KeyForEncryptionOfKey, AES.MODE_CFB, IVForEncryptionOfIV)
-    decryptedcipher = testKeyObj.decrypt(cipherkeys)
 
     msg = bytes(msg,'UTF-8')
     MessageObj = AES.new(Key, AES.MODE_CFB, fileSecret)
@@ -58,7 +54,7 @@ def do_encrypt(msg):
 # This function will take an input, use the encrypted data and decrypt it using the IV and the key. #
 
 def do_decrypt_key(Message):
-    KeyFiles = open("PassIV","r")
+    KeyFiles = open("/home/devmain/uni-work/agent-resources/eos-agent/modules/security/PassIV","r")
     KeyFileLines = KeyFiles.read().splitlines()
     KeyForDecryptionOfKey = (KeyFileLines[0])
     IVForDecryptionOfIV = (KeyFileLines[1])
@@ -72,9 +68,17 @@ def do_decrypt(Message,Key,IV):
     decryptedMessage = testKeyObj.decrypt(Message)
     return decryptedMessage
 
+def decryption(message):
+	keydecode = do_decrypt_key(message[0])
+	keydecode = keydecode.decode()
+	keydecode = keydecode.split(',')
+	decryptedmessage = do_decrypt(message[1],keydecode[0],keydecode[1])
+	return decryptedmessage.decode()
+
 def serialize(Message):
 	Message = do_encrypt(Message)
-	SerializedMessage = bytes(pickle.dumps(Message))
-	return SerializedMessage
+	header_length = (f'{len(str(Message))}')
+	encryptedtest = pickle.dumps([header_length,Message])
+	return encryptedtest
 
 	
