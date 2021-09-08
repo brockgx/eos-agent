@@ -109,6 +109,8 @@ def setupAgentSocket(socketNum):
 def createSockets():
   for i in range(NUM_OF_SOCKET_LISTENERS):
     createNewThread(setupAgentSocket, (i,))
+
+def startAgent():
   # Start Metrics Threads
   start_agent()
 

@@ -107,6 +107,7 @@ def thread_disk_metrics():
         read_bytes = psutil.disk_io_counters().read_bytes
 
         if disk_bytes_write:
+            
             disk_write_string = ("%0.1f MB" % ((write_bytes - disk_bytes_write)/(1024*1024)))
         
         if disk_bytes_read:
@@ -114,6 +115,10 @@ def thread_disk_metrics():
         #print(disk_string)
 
         disk_bytes_write = write_bytes
+        #print("write:", end="")
+        #print(psutil.disk_io_counters().write_bytes)
+        #print("read:", end="")
+        #print(psutil.disk_io_counters().write_bytes)
         disk_bytes_read = read_bytes
 
         time.sleep(5)
