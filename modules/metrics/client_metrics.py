@@ -7,6 +7,8 @@ import psutil
 list_current_processes = []
 list_current_processes_sorted = []
 system_metrics = None
+network_percent = 0.0
+network_string = ""
 disk_metrics_list = []
 #disk_metrics = None
 
@@ -77,6 +79,24 @@ def thread_system_metrics():
         system_metrics = system(psutil.cpu_percent(), psutil.virtual_memory().percent)
         time.sleep(5)
         
+def thread_network_metrics():
+    global network_percent
+    global network_string
+    while True:
+        new_value = psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
+
+        if network_percent:
+            network_string = "%0.2f" % ((convert_to_gbit(new_value - network_percent)*100))
+
+        network_percent = new_value
+
+        time.sleep(1)
+
+
+def convert_to_gbit(value):
+    return value/1024./1024./1024.*8
+
+        
 def thread_json():
     time.sleep(5)
     while(True):
@@ -103,7 +123,8 @@ def get_json():
         "collection_time": now.strftime("%m/%d/%Y, %H:%M:%S"),
         "app_metrics": app_metrics,
         "system_metrics": [{"cpu":system_metrics.cpu}, {"ram":system_metrics.ram}],
-        "disk_metrics": disk_metrics
+        "disk_metrics": disk_metrics,
+        "network_percent": network_string
     }
     return json.dumps(x)
 
@@ -114,13 +135,12 @@ def start_agent():
     system_thread = threading.Thread(target = thread_system_metrics)
     if not system_thread.is_alive():
         system_thread.start()
+    network_thread = threading.Thread(target = thread_network_metrics)
+    if not network_thread.is_alive():
+        network_thread.start()
 
 
 def main():
-    #partitions = psutil.disk_partitions()
-    #for partition in partitions:
-    #    print(partition)
-    #print(partitions)
     start_agent()
     json_thread = threading.Thread(target = thread_json)
     if not json_thread.is_alive():
