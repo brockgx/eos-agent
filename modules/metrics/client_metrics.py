@@ -14,7 +14,7 @@ class application:
         self.cpu = cpu
         self.ram = ram
     def to_dict(self):
-      return {"name": self.name, "cpu": self.cpu, "ram": self.ram}
+        return {"name": self.name, "cpu": self.cpu, "ram": self.ram}
 
 class system:
     def __init__(self, cpu, ram):
@@ -28,7 +28,7 @@ def get_list_of_processes(list_processes):
         try:
             exe_path = proc.exe()
             process_name = proc.name()
-            if ".exe" in process_name:
+            if process_name != "":
                 list_processes.append(application(process_name, round(proc.cpu_percent()/cpu_count,2), round(proc.memory_percent(),2)))
 
             
@@ -62,7 +62,11 @@ from datetime import datetime
 def get_json():
     now = datetime.now()
     app_metrics = []
-    for i in range(5):
+    rangeCount = len(list_current_processes_sorted)
+    max = 10
+    if rangeCount > max:
+        rangeCount = 10
+    for i in range(rangeCount):
         app_metrics.append(list_current_processes_sorted[i].to_dict())
     x = {
         "machine_name": socket.gethostname(),
