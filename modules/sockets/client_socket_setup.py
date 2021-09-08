@@ -5,6 +5,7 @@ import time
 
 #Import in house libraries
 from .socket_data_transfer import sendSocketData, receiveSocketData
+from ..metrics.client_metrics import start_agent, get_json
 
 #Define any constant expressions
 AGENT_SOCKET_DETAILS = {
@@ -96,6 +97,9 @@ def runAgentCommands(agentSocket):
       sendSocketData(agentSocket, "Welcome to the socket for messaging")
     if data == 'PINGING':
       sendSocketData(agentSocket, "I'm Alive")
+    if data == 'JSON':
+      json_output = get_json()
+      sendSocketData(agentSocket,json_output)
 
 
 def setupAgentSocket(socketNum):
@@ -105,6 +109,8 @@ def setupAgentSocket(socketNum):
 def createSockets():
   for i in range(NUM_OF_SOCKET_LISTENERS):
     createNewThread(setupAgentSocket, (i,))
+  # Start Metrics Threads
+  start_agent()
 
 
 #JUST A TEST FUNCTION
