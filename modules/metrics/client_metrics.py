@@ -38,7 +38,6 @@ def get_list_of_processes(list_processes):
 
 
 
-
 def thread_application_metrics():
     global list_current_processes
     global list_current_processes_sorted
@@ -54,6 +53,11 @@ def thread_system_metrics():
     global system_metrics
     while(True):
         system_metrics = system(psutil.cpu_percent(), psutil.virtual_memory().percent)
+        time.sleep(5)
+        
+def thread_json():
+    while(True):
+        print(get_json())
         time.sleep(5)
 
 
@@ -83,3 +87,13 @@ def start_agent():
     system_thread = threading.Thread(target = thread_system_metrics)
     if not system_thread.is_alive():
         system_thread.start()
+
+
+def main():
+    start_agent()
+    json_thread = threading.Thread(target = thread_json)
+    if not json_thread.is_alive():
+        json_thread.start()
+
+if __name__ == "__main__":
+    main()
