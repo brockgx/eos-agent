@@ -9,6 +9,10 @@ list_current_processes_sorted = []
 system_metrics = None
 network_percent = 0.0
 network_string = ""
+disk_bytes_write = 0.0
+disk_write_string = ""
+disk_bytes_read = 0.0
+disk_read_string = ""
 disk_metrics_list = []
 #disk_metrics = None
 
@@ -92,6 +96,28 @@ def thread_network_metrics():
 
         time.sleep(1)
 
+def thread_disk_metrics():
+    global disk_bytes_write
+    global disk_write_string
+    global disk_bytes_read
+    global disk_read_string
+    while True:
+        #print(psutil.disk_io_counters(perdisk=True))
+        write_bytes = psutil.disk_io_counters().write_bytes
+        read_bytes = psutil.disk_io_counters().read_bytes
+
+        if disk_bytes_write:
+            disk_write_string = ("%0.1f MB" % ((write_bytes - disk_bytes_write)/(1024*1024)))
+        
+        if disk_bytes_read:
+            disk_read_string = ("%0.1f MB" % ((read_bytes - disk_bytes_read)/(1024*1024)))
+        #print(disk_string)
+
+        disk_bytes_write = write_bytes
+        disk_bytes_read = read_bytes
+
+        time.sleep(5)
+
 
 def convert_to_gbit(value):
     return value/1024./1024./1024.*8
@@ -124,9 +150,13 @@ def get_json():
         "app_metrics": app_metrics,
         "system_metrics": [{"cpu":system_metrics.cpu}, {"ram":system_metrics.ram}],
         "disk_metrics": disk_metrics,
+        "disk_bytes_written": disk_write_string,
+        "disk_bytes_read": disk_read_string,
         "network_percent": network_string
     }
     return json.dumps(x)
+
+#"disk_total_usage": disk_string,
 
 def start_agent():
     application_thread = threading.Thread(target = thread_application_metrics)
@@ -138,6 +168,9 @@ def start_agent():
     network_thread = threading.Thread(target = thread_network_metrics)
     if not network_thread.is_alive():
         network_thread.start()
+    disk_thread = threading.Thread(target = thread_disk_metrics)
+    if not disk_thread.is_alive():
+        disk_thread.start()
 
 
 def main():
