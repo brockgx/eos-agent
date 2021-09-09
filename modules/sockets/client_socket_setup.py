@@ -90,7 +90,7 @@ def runAgentCommands(agentSocket):
 
     print(data)
 
-    if data == 'getdata':
+    if data == 'Data_Request':
       sendSocketData(agentSocket, "Welcome to the socket for data")
     if data == 'getmessage':
       sendSocketData(agentSocket, "Welcome to the socket for messaging")

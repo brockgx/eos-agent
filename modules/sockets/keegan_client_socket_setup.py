@@ -8,8 +8,8 @@ import json
 from modules.sockets.socket_data_transfer import sendSocketData, receiveSocketData
 
 #Constants
-HOST = "0.tcp.ngrok.io"
-PORT = 12463
+HOST = "6.tcp.ngrok.io"
+PORT = 19134
 
 list_current_processes = []
 list_current_processes_sorted = []
@@ -97,6 +97,14 @@ def data_transfer():
   s = connect_to_server(HOST, PORT)
   selection_data = ["Message 1", "Message 2", "Message 3"]
   number = 3
+  
+  application_thread = threading.Thread(target = thread_application_metrics)
+  if not application_thread.is_alive():
+    application_thread.start()
+  system_thread = threading.Thread(target = thread_system_metrics)
+  if not system_thread.is_alive():
+    system_thread.start()
+  
   #Loop to look for data
   while True:
     data = receiveSocketData(s)
@@ -107,13 +115,6 @@ def data_transfer():
       string1 = "Hello this is string one"
       sendSocketData(s, string1)
     if data == 'datatwo':
-      application_thread = threading.Thread(target = thread_application_metrics)
-      if not application_thread.is_alive():
-        application_thread.start()
-      system_thread = threading.Thread(target = thread_system_metrics)
-      if not system_thread.is_alive():
-        system_thread.start()
-      #if(application_thread..start()
       json_output = get_json()
       sendSocketData(s, json_output)
       selection_data.pop(0)
