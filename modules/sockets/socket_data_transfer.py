@@ -57,12 +57,13 @@ def receiveSocketData(socketConn):
       
       if len(completeMsg)-HEADERSIZE == lengthMsg:
         #Do something with the data - print example
-        print(base64.b64decode(completeMsg[HEADERSIZE:]))
-        yolo = base64.b64decode(completeMsg[HEADERSIZE:])
-        decrypt = do_decrypt(yolo)
+        receievedMsg = completeMsg[HEADERSIZE:].decode("utf-8")
+        #print(base64.b64decode(completeMsg[HEADERSIZE:]))
+        #yolo = base64.b64decode(completeMsg[HEADERSIZE:])
+        #decrypt = do_decrypt(yolo)
         #receievedMsg = decrypt.decode("utf-8")
-        receievedMsg = decrypt
-        print("Full message received")
+        #receievedMsg = decrypt
+        #print("Full message received")
         #Decrypt here
         #my_msg = receieved_msg[2:][:-1]
         #print(my_msg)
