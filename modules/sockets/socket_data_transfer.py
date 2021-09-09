@@ -1,9 +1,10 @@
 #import third party libraries
 import pickle
 import time
+import base64
 
 #import personal libraries
-#from ..security.AESEncryption import serialize
+from ..security.AESEncryption import do_encrypt, do_decrypt
 
 #Constants
 HEADERSIZE = 10
@@ -37,6 +38,7 @@ def receiveSocketData(socketConn):
   newMsg = True
   lengthMsg = True
   completeMsg = b''
+  compdecr = b''
 
   while receiveMsg:
     try:
@@ -48,13 +50,19 @@ def receiveSocketData(socketConn):
       if newMsg:
         lengthMsg = int(msg[:HEADERSIZE])
         newMsg = False
-        
+      
+      fin = msg[HEADERSIZE:]
       completeMsg += msg
+      #compdecr +=decr
       
       if len(completeMsg)-HEADERSIZE == lengthMsg:
         #Do something with the data - print example
-        receievedMsg = completeMsg[HEADERSIZE:].decode("utf-8")
-
+        print(base64.b64decode(completeMsg[HEADERSIZE:]))
+        yolo = base64.b64decode(completeMsg[HEADERSIZE:])
+        decrypt = do_decrypt(yolo)
+        #receievedMsg = decrypt.decode("utf-8")
+        receievedMsg = decrypt
+        print("Full message received")
         #Decrypt here
         #my_msg = receieved_msg[2:][:-1]
         #print(my_msg)
