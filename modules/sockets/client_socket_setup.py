@@ -97,6 +97,8 @@ def runAgentCommands(agentSocket):
       sendSocketData(agentSocket, "Welcome to the socket for messaging")
     if data == 'PINGING':
       sendSocketData(agentSocket, "I'm Alive")
+    if data == 'Command':
+      sendSocketData(agentSocket, "Command successful")
     if data == 'JSON':
       json_output = get_json()
       sendSocketData(agentSocket,json_output)
