@@ -17,7 +17,7 @@ def retreive_config_details(file_path):
   config = ConfigParser()
   config.read(file_path)
 
-  required_properties = ["SERVER_ADDRESS", "SERVER_PORT", "MAIN_PORT", "SECONDARY_PORT"]
+  required_properties = ["SERVER_ADDRESS", "SERVER_PORT", "HTTPS_ENABLED", "MAIN_PORT", "SECONDARY_PORT"]
   details = {**config['server-details'], **config['socket-details']}
   try:
     for key in details:
@@ -27,12 +27,12 @@ def retreive_config_details(file_path):
     print_log_msg(str(err.args[0]))
     print_log_msg("Looking for properties: " + str(err.args[1:]))
     sys.exit(1)
-  
   return {
       "server_ip": details["server_address"],
-      "server_port": details["server_port"],
-      "socket_mport": details["main_port"],
-      "socket_sport": details["secondary_port"]
+      "server_port": int(details["server_port"]),
+      "server_https_enabled": details["https_enabled"],
+      "socket_mport": int(details["main_port"]),
+      "socket_sport": int(details["secondary_port"]),
     }
 
 #Create, configure and run a thread
@@ -50,14 +50,14 @@ def get_agent_details():
     "os_version": platform.version(),
     "processor_type": platform.processor(),
     "host_name": socket.gethostname(),
-    "ip_addr_v4": socket.gethostbyname(socket.gethostname())
+    "ip_addr_v4": int(ipaddress.IPv4Address(socket.gethostbyname(socket.gethostname())))
   }
 
 #Send agent details to the API for storage
-def send_agent_details(server_address, post_route, agent_details):
-  print_log_msg("Sending the agent details to " + server_address + post_route)
+def send_agent_details(server_address_route, agent_details):
+  print_log_msg("Sending the agent details to " + server_address_route)
   try:
-    api_result = requests.post(server_address + post_route, json=agent_details)
+    api_result = requests.post(server_address_route, json=agent_details)
     if api_result.status_code == 200 and api_result.text == "Success":
       print_log_msg("Sent the agent details successfully")
       return True
@@ -69,7 +69,7 @@ def send_agent_details(server_address, post_route, agent_details):
       print_log_msg("Failure occurred: (" + str(api_result.status_code) + ") " + str(api_result.reason))
       return False
   except Exception as err:
-    print_log_msg("Failed to connect to: " + server_address + post_route)
+    print_log_msg("Failed to connect to: " + server_address_route)
     return False
 
 
