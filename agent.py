@@ -1,5 +1,7 @@
-import os, platform, time
-from modules.sockets.agent_core_setup import retreive_config_details, send_agent_details, get_agent_details
+import os, platform, time, json
+from modules.utilities.agent_core import get_agent_details, send_agent_details
+from modules.utilities.config_setup import retreive_config_details
+from modules.sockets.socket_setup import create_socket
 from modules.metrics.client_metrics import start_agent as enable_data_collection
 from modules.metrics.client_metrics import get_json
 
@@ -33,14 +35,15 @@ while True:
 #possibly collating info and sending every 5 mins
 enable_data_collection()
 
-#Start collection thread loop
+#Start collection thread loop (thread 1)
 
 #Setup socket listeners (start listening loops)
-# - for handling real time data gathering and commands
+#Socket on main port for handling commands (thread 2)
+create_socket(agent_config_details["server_ip"], agent_config_details["socket_mport"])
+#Socket on secondary port for handling data (may not be needed) (thread 3)
+create_socket(agent_config_details["server_ip"], agent_config_details["socket_sport"])
 
-#Infinite while loop to keep the program alive, currently
-# - grabs data periodically and displays it
-import json #temp
+#Thread 4, a thread checker? Plus all Keegans threads
 
 while True:
  time.sleep(DELAY_TIME/2)
