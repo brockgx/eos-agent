@@ -2,7 +2,11 @@
 from configparser import ConfigParser
 
 ## Functions ##
-#Get config file details - split for gathering different components
+#Function: Read and save the details from the config file
+#Params:
+#   - file_path: the location of the config file
+#Returned:
+#   - Dict object of the config details
 def retreive_config_details(file_path):
   config = ConfigParser()
   config.read(file_path)
