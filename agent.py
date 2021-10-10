@@ -1,7 +1,8 @@
-import os, platform, time
+import os, platform, time, requests, json #temp
 from modules.sockets.agent_core_setup import retreive_config_details, send_agent_details, get_agent_details
 from modules.metrics.client_metrics import start_agent as enable_data_collection
 from modules.metrics.client_metrics import get_json
+
 
 #Define any constant expressions
 DELAY_TIME = 20
@@ -33,6 +34,32 @@ while True:
 #possibly collating info and sending every 5 mins
 enable_data_collection()
 
+
+
+def collect_data():
+  timeout = 300   # 5 mins
+  timeout_start = time.time() # current time
+  
+  metrics = [] #LIST for data collection
+
+  while time.time() < timeout_start + timeout: 
+      data = json.loads(get_json())   #JSON Object
+      metrics.append(data)  # passing the data into the list.
+      time.sleep(10)
+
+  print("5 mins are up. posting data now.")
+
+  requests.post("http://localhost:5000/test/addmetrics", data=metrics) # not sure about this one
+  return metrics
+ 
+#def commands():
+    # listen for commands via socket? or api
+
+    
+
+
+
+      
 #Start collection thread loop
 
 #Setup socket listeners (start listening loops)
@@ -40,7 +67,7 @@ enable_data_collection()
 
 #Infinite while loop to keep the program alive, currently
 # - grabs data periodically and displays it
-import json #temp
+
 
 while True:
  time.sleep(DELAY_TIME/2)
