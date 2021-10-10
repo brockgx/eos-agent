@@ -51,7 +51,7 @@ def send_agent_details(server_address_route, agent_details):
       print_log_msg("Sent the agent details successfully")
       return True
     elif api_result.status_code == 200:
-      print_log_msg("Connect to the endpoint was good; however, an error occurred.")
+      print_log_msg("Connection to the endpoint was good; however, an error occurred.")
       print_log_msg(str(api_result.text))
       return False
     else:
