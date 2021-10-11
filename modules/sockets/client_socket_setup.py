@@ -2,6 +2,8 @@
 import socket
 import threading
 import time
+import json
+import subprocess
 
 #Import in house libraries
 from .socket_data_transfer import sendSocketData, receiveSocketData
@@ -97,12 +99,52 @@ def runAgentCommands(agentSocket):
       sendSocketData(agentSocket, "Welcome to the socket for messaging")
     if data == 'PINGING':
       sendSocketData(agentSocket, "I'm Alive")
-    if data == 'Command':
+    if data.startswith("CMD"):
+      left, right = data.split('\n')
+      commandProcessor(right)
       sendSocketData(agentSocket, "Command successful")
+    if data.startswith("SHELL"):
+      left, right = data.split('\n')
+      result = shellProcessor(right)
+      sendSocketData(agentSocket, result)
     if data == 'JSON':
       json_output = get_json()
       sendSocketData(agentSocket,json_output)
 
+def commandProcessor(commandJson):
+  print("JSON Command Processor")
+  #print(commandJson)
+  command = json.loads(commandJson)
+  type = command['TYPE']
+  attribute = command['ATTRIBUTE']
+  if type == "command":
+    print("Command Received")
+    print(attribute)
+    if attribute == "shutdown":
+      print("Shutdown Initiated")
+    elif attribute == "reset":
+      print("Reset Initiated")
+      
+def shellProcessor(commandJson):
+  print("Shell command")
+  #print(commandJson)
+  command = json.loads(commandJson)
+  type = command['TYPE']
+  attribute = command['ATTRIBUTE']
+  if type == "shell":
+    print("Shell Command Received")
+    print(attribute)
+    left = ""
+    right = ""
+    if ' ' in attribute:
+      pos = attribute.find(' ')+1
+      left, right = attribute[:pos], attribute[pos:]
+    else:
+      left = attribute
+    result = subprocess.run([left, right], capture_output=True).stdout.decode('utf-8')
+    print(result)
+    return result
+    # run attribute
 
 def setupAgentSocket(socketNum):
   newSocket = configureSocket(AGENT_SOCKET_DETAILS['AGENT_IP'], AGENT_SOCKET_DETAILS['AGENT_PORTS'][socketNum])
