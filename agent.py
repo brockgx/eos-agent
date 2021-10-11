@@ -1,5 +1,5 @@
 import os, platform, time, json
-from modules.utilities.agent_core import get_agent_details, send_agent_details
+from modules.utilities.agent_core import get_agent_details, send_agent_details, data_collection
 from modules.utilities.config_setup import retreive_config_details
 from modules.sockets.socket_setup import create_socket
 from modules.metrics.client_metrics import start_agent as enable_data_collection
@@ -34,6 +34,8 @@ while True:
 #combine metric collector with metric sender
 #possibly collating info and sending every 5 mins
 enable_data_collection()
+time.sleep(10)
+data_collection(api_endpoint+"/test/addmetrics", 10, 150)
 
 #Start collection thread loop (thread 1)
 

@@ -1,7 +1,9 @@
 #Import third party libraries
-import socket, threading, sys, platform, ipaddress, requests
+import socket, threading, sys, platform, ipaddress, requests, time, json
 import ifcfg #needs pip install
 from datetime import datetime
+
+from ..metrics.client_metrics import get_json
 
 ## Functions ##
 #Function: Generate a structured message for printing to the console
@@ -60,3 +62,25 @@ def send_agent_details(server_address_route, agent_details):
   except Exception as err:
     print_log_msg("Failed to connect to: " + server_address_route)
     return False
+
+#Function: Collect the machine data and send
+def data_processing(api_route, collection_interval, post_interval):
+  timeout = post_interval
+  print_log_msg("Data processing")
+  while True:
+    timeout_start = time.time()
+    metrics = []
+
+    while time.time() < timeout_start + timeout:
+      print_log_msg("Data now collecting " + str(time.time()) + " < " + str(timeout_start + timeout))
+      data = json.loads(get_json())
+      metrics.append(data)
+      time.sleep(collection_interval)
+    
+    print_log_msg("5 mins reached. Posting metric data")
+    requests.post(api_route, json={"content": metrics})
+
+#Function: Thread Data collection
+def data_collection(api_route, coll_interval, post_interval):
+  create_new_thread(data_processing, [api_route, coll_interval, post_interval])
+  print_log_msg("Data collection thread started.")
