@@ -4,10 +4,12 @@ import threading
 import time
 import json
 import subprocess
+import base64
 
 #Import in house libraries
 from .socket_data_transfer import sendSocketData, receiveSocketData
 from ..metrics.client_metrics import start_agent, get_json
+from ..commands.client_commands import shutdown
 
 #Define any constant expressions
 AGENT_SOCKET_DETAILS = {
@@ -107,9 +109,31 @@ def runAgentCommands(agentSocket):
       left, right = data.split('\n')
       result = shellProcessor(right)
       sendSocketData(agentSocket, result)
+    if data.startswith("FILE"):
+      left, right = data.split('\n')
+      result = fileProcessor(right)
+      sendSocketData(agentSocket, result)
     if data == 'JSON':
       json_output = get_json()
       sendSocketData(agentSocket,json_output)
+      
+def fileProcessor(commandJson):
+  print("File Processor")
+  #print(commandJson)
+  command = json.loads(commandJson)
+  type = command['TYPE']
+  b64file = command['FILE']
+  destination = command['DESTINATION']
+  if type == "file":
+    print("File Received")
+    print(b64file)
+    file = base64.b64decode(b64file)
+    outFileHandle = open(destination, "wb")
+    outFileHandle.write(file)
+    result = "File Written to " + destination
+    print(result)
+    return result
+
 
 def commandProcessor(commandJson):
   print("JSON Command Processor")
@@ -122,6 +146,7 @@ def commandProcessor(commandJson):
     print(attribute)
     if attribute == "shutdown":
       print("Shutdown Initiated")
+      shutdown()
     elif attribute == "reset":
       print("Reset Initiated")
       
