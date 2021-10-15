@@ -1,5 +1,7 @@
-import os, platform, time, requests, json #temp
-from modules.sockets.agent_core_setup import retreive_config_details, send_agent_details, get_agent_details
+import os, platform, time, json
+from modules.utilities.agent_core import get_agent_details, send_agent_details, data_collection
+from modules.utilities.config_setup import retreive_config_details
+from modules.sockets.socket_setup import create_socket
 from modules.metrics.client_metrics import start_agent as enable_data_collection
 from modules.metrics.client_metrics import get_json
 
@@ -24,7 +26,7 @@ api_endpoint += str(agent_config_details["server_ip"])+":"+str(agent_config_deta
 #Start up agent, with data collection, socket listeners and loop
 #Sending machine details untill successful
 while True:
-  result = send_agent_details(api_endpoint+"/test/senddetails", get_agent_details())
+  result = send_agent_details(api_endpoint+"/dash/clientmachines", get_agent_details())
   if result:
     break
   time.sleep(DELAY_TIME)
@@ -33,41 +35,18 @@ while True:
 #combine metric collector with metric sender
 #possibly collating info and sending every 5 mins
 enable_data_collection()
+time.sleep(10)
+data_collection(api_endpoint+"/test/addmetrics", 10, 150)
 
-
-
-def collect_data():
-  timeout = 300   # 5 mins
-  timeout_start = time.time() # current time
-  
-  metrics = [] #LIST for data collection
-
-  while time.time() < timeout_start + timeout: 
-      data = json.loads(get_json())   #JSON Object
-      metrics.append(data)  # passing the data into the list.
-      time.sleep(10)
-
-  print("5 mins are up. posting data now.")
-
-  requests.post("http://localhost:5000/test/addmetrics", data=metrics) # not sure about this one
-  return metrics
- 
-#def commands():
-    # listen for commands via socket? or api
-
-    
-
-
-
-      
-#Start collection thread loop
+#Start collection thread loop (thread 1)
 
 #Setup socket listeners (start listening loops)
-# - for handling real time data gathering and commands
+#Socket on main port for handling commands (thread 2)
+create_socket(agent_config_details["server_ip"], agent_config_details["socket_mport"])
+#Socket on secondary port for handling data (may not be needed) (thread 3)
+create_socket(agent_config_details["server_ip"], agent_config_details["socket_sport"])
 
-#Infinite while loop to keep the program alive, currently
-# - grabs data periodically and displays it
-
+#Thread 4, a thread checker? Plus all Keegans threads
 
 while True:
  time.sleep(DELAY_TIME/2)
