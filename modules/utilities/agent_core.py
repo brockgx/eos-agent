@@ -2,6 +2,7 @@
 import socket, threading, sys, platform, ipaddress, requests, time, json
 import ifcfg #needs pip install
 from datetime import datetime
+from getmac import get_mac_address
 
 from ..metrics.client_metrics import get_json
 
@@ -36,7 +37,8 @@ def get_agent_details():
     "os_version": platform.version(),
     "processor_type": platform.processor(),
     "host_name": socket.gethostname(),
-    "ip_addr_v4": int(ipaddress.IPv4Address(socket.gethostbyname(socket.gethostname())))
+    "ip_addr_v4": int(ipaddress.IPv4Address(socket.gethostbyname(socket.gethostname()))),
+    "mac_addr": get_mac_address()
   }
 
 #Function: Send the collected machine details to the API
@@ -66,13 +68,11 @@ def send_agent_details(server_address_route, agent_details):
 #Function: Collect the machine data and send
 def data_processing(api_route, collection_interval, post_interval):
   timeout = post_interval
-  print_log_msg("Data processing")
   while True:
-    timeout_start = time.time()
+    timeout_start = datetime.timestamp(datetime.now())
     metrics = []
 
-    while time.time() < timeout_start + timeout:
-      print_log_msg("Data now collecting " + str(time.time()) + " < " + str(timeout_start + timeout))
+    while datetime.timestamp(datetime.now()) < timeout_start + timeout:
       data = json.loads(get_json())
       metrics.append(data)
       time.sleep(collection_interval)
