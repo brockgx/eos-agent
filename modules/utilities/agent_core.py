@@ -29,7 +29,7 @@ def create_new_thread(target_function, target_args = ()):
 #Params: - None
 #Returned:
 #   - Dict/JSON object of the required machine details
-def get_agent_details():
+def get_agent_details(config_details):
   return {
     "os_type": platform.system(),
     "os_details": platform.platform(),
@@ -38,6 +38,7 @@ def get_agent_details():
     "processor_type": platform.processor(),
     "host_name": socket.gethostname(),
     "ip_addr_v4": int(ipaddress.IPv4Address(socket.gethostbyname(socket.gethostname()))),
+    "port_numbers": [str(config_details["socket_mport"]),str(config_details["socket_sport"])], 
     "mac_addr": get_mac_address()
   }
 

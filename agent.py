@@ -26,7 +26,7 @@ api_endpoint += str(agent_config_details["server_ip"])+":"+str(agent_config_deta
 #Start up agent, with data collection, socket listeners and loop
 #Sending machine details untill successful
 while True:
-  result = send_agent_details(api_endpoint+"/dash/clientmachines", get_agent_details())
+  result = send_agent_details(api_endpoint+"/dash/clientmachines", get_agent_details(agent_config_details))
   if result:
     break
   time.sleep(DELAY_TIME)
