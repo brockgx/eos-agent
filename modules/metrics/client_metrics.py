@@ -1,8 +1,8 @@
 import threading
 import time
-import socket
 import json
 import psutil
+from getmac import get_mac_address
 
 list_current_processes = []
 list_current_processes_sorted = []
@@ -17,12 +17,13 @@ disk_metrics_list = []
 #disk_metrics = None
 
 class application:
-    def __init__(self, name, cpu, ram):
+    def __init__(self, pid, name, cpu, ram):
+        self.pid = pid
         self.name = name
         self.cpu = cpu
         self.ram = ram
     def to_dict(self):
-        return {"name": self.name, "cpu": self.cpu, "ram": self.ram}
+        return {"pid": self.pid, "name": self.name, "cpu": self.cpu, "ram": self.ram}
 
 class system:
     def __init__(self, cpu, ram):
@@ -45,8 +46,9 @@ def get_list_of_processes(list_processes):
         try:
             exe_path = proc.exe()
             process_name = proc.name()
+            process_pid = proc.pid
             if process_name != "":
-                list_processes.append(application(process_name, round(proc.cpu_percent()/cpu_count,2), round(proc.memory_percent(),2)))
+                list_processes.append(application(process_pid, process_name, round(proc.cpu_percent()/cpu_count,2), round(proc.memory_percent(),2)))
 
             
         #print(process_name , ' ::: ', processID)
@@ -108,10 +110,10 @@ def thread_disk_metrics():
 
         if disk_bytes_write:
             
-            disk_write_string = ("%0.1f MB" % ((write_bytes - disk_bytes_write)/(1024*1024)))
+            disk_write_string = ("%d" % (write_bytes - disk_bytes_write))
         
         if disk_bytes_read:
-            disk_read_string = ("%0.1f MB" % ((read_bytes - disk_bytes_read)/(1024*1024)))
+            disk_read_string = ("%d" % (read_bytes - disk_bytes_read))
         #print(disk_string)
 
         disk_bytes_write = write_bytes
@@ -138,7 +140,7 @@ def thread_json():
 from datetime import datetime
 
 def get_json():
-    now = datetime.now()
+    now = datetime.timestamp(datetime.now())
     app_metrics = []
     disk_metrics = []
     rangeCount = len(list_current_processes_sorted)
@@ -150,14 +152,17 @@ def get_json():
     for i in range(len(disk_metrics_list)):
         disk_metrics.append(disk_metrics_list[i].to_dict())
     x = {
-        "machine_name": socket.gethostname(),
-        "collection_time": now.strftime("%m/%d/%Y, %H:%M:%S"),
+        "machine": get_mac_address(),
+        "timestamp": now,
         "app_metrics": app_metrics,
-        "system_metrics": [{"cpu":system_metrics.cpu}, {"ram":system_metrics.ram}],
-        "disk_metrics": disk_metrics,
-        "disk_bytes_written": disk_write_string,
-        "disk_bytes_read": disk_read_string,
-        "network_percent": network_string
+        "system_metrics": {
+            "cpu":system_metrics.cpu,
+            "ram":system_metrics.ram,
+            "disk_metrics": disk_metrics,
+            "disk_bytes_written": disk_write_string,
+            "disk_bytes_read": disk_read_string,
+            "network_percent": network_string
+        }
     }
     return json.dumps(x)
 
