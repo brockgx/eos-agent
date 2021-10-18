@@ -1,3 +1,3 @@
-from modules.test.new_server_connection import data_transfer
+from modules.test.new_server_connection import startServer
 
-data_transfer()
+startServer()
