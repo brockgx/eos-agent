@@ -48,8 +48,8 @@ create_socket(agent_config_details["server_ip"], agent_config_details["socket_sp
 
 #Thread 4, a thread checker? Plus all Keegans threads
 
-while True:
- time.sleep(DELAY_TIME/2)
- metrics = json.loads(get_json())
- print(str(metrics["collection_time"]) + " - " + str(metrics["machine_name"]) + " - " + str(metrics["system_metrics"][0]["cpu"]))
-  
+# while True:
+#   pass
+#  time.sleep(DELAY_TIME/2)
+#  metrics = json.loads(get_json())
+#  print(str(metrics["collection_time"]) + " - " + str(metrics["machine_name"]) + " - " + str(metrics["system_metrics"][0]["cpu"]))

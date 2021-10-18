@@ -1,9 +1,11 @@
 #Import third party libraries
-import socket, time
+import socket, time,select,queue
 
 #Import application specific modules
 from ..utilities.agent_core import print_log_msg, create_new_thread
 from .data_transfer import sendSocketData, receiveSocketData
+
+
 
 ## Functions ##
 #Function: To create a new socket via wrapper function
@@ -21,10 +23,9 @@ def create_socket(socket_ip, socket_port):
 #Returned: - None
 def setup_socket_listener(socket_ip, socket_port):
   new_socket = configure_socket(socket_ip, socket_port)
-  #Then run main function
-  while True:
-    print_log_msg("Doing stuff on socket (" + str(socket_port) + ")")
-    time.sleep(30)
+  #Then run main function   
+  mainFunction(new_socket)
+  print_log_msg("Doing stuff on socket (" + str(socket_port) + ")")
 
 #Function: Generate the server socket
 #Params:
@@ -51,12 +52,64 @@ def configure_socket(socket_ip, socket_port):
 #Params:
 #   -  agent_socket: the socket object for connections
 #Returned: - None
-def accept_new_connections(agent_socket):
-  #Get new connection
-  conn, c_addr = agent_socket.accept()
-  print_log_msg("New connection from: " + str(c_addr))
-  conn.setblocking(0) # or 1
+# def accept_new_connections(agent_socket):
+  
+#   #Get new connection
+#   conn, c_addr = agent_socket.accept()
+#   print_log_msg("New connection from: " + str(c_addr))
+#   return conn,c_addr
+ 
 
-  #Save connection details
-  all_socket_connections.append(conn)
-  all_message_queues[conn] = queue.Queue()
+  #Function: main function
+def mainFunction(sock):
+  allSocketConnections = [sock]
+  allSocketOutputs = []
+  allMessageQueues = {}
+
+
+  while allSocketConnections:
+    print("\nWaiting for next event (" + str(sock.getsockname()[1]) + ")...")
+    readable, writable, exceptional = select.select(allSocketConnections, allSocketOutputs, allSocketConnections)     #Not working after this.
+
+    for read in readable:
+      if read is sock:
+        print("Accepting connnections")
+        connection, client_address = read.accept()
+        connection.setblocking(0)
+        allSocketConnections.append(connection)
+        allMessageQueues[connection] = queue.Queue()
+        
+      else:
+        data = receiveSocketData(read)
+        if data:
+          print("Receieved: " + str(data) + " from (" + str(read.getpeername()) + ").")
+          allMessageQueues[read].put(data)
+          if read not in allSocketOutputs:
+            allSocketOutputs.append(read)
+        else:
+          print("Closing " + str(read.getsockname()) + " after reading no data")
+          if read in allSocketOutputs:
+            allSocketOutputs.remove(read)
+          
+          read.close()
+          del allMessageQueues[read]
+
+    for write in writable:
+      try:
+        next_msg = allMessageQueues[write].get_nowait()
+      except queue.Empty:
+        print("Output queue for " + str(write.getpeername()) + " is empty")
+        allSocketOutputs.remove(write)
+      else:
+        print("Sending " + str(next_msg) + " to " + str(write.getpeername()))
+        sendSocketData(write, next_msg)
+        allSocketConnections.remove(write) #removing the connection from list after sending
+
+    for exc in exceptional:
+      print("Handling exceptional condition for " + str(exc.getpeername()))
+      allSocketConnections.remove(exc)
+      if exc in allSocketOutputs:
+        allSocketOutputs.remove(exc)
+      exc.close()
+      del allMessageQueues[exc]
+

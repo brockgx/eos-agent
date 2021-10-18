@@ -77,8 +77,11 @@ def data_processing(api_route, collection_interval, post_interval):
       metrics.append(data)
       time.sleep(collection_interval)
     
-    print_log_msg("5 mins reached. Posting metric data")
+    print_log_msg("3 mins reached. Posting metric data")
     requests.post(api_route, json={"content": metrics})
+
+#Function: Commands
+
 
 #Function: Thread Data collection
 def data_collection(api_route, coll_interval, post_interval):
