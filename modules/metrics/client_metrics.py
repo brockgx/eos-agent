@@ -1,8 +1,8 @@
 import threading
 import time
-import socket
 import json
 import psutil
+from getmac import get_mac_address
 
 list_current_processes = []
 list_current_processes_sorted = []
@@ -138,7 +138,7 @@ def thread_json():
 from datetime import datetime
 
 def get_json():
-    now = datetime.now()
+    now = datetime.timestamp(datetime.now())
     app_metrics = []
     disk_metrics = []
     rangeCount = len(list_current_processes_sorted)
@@ -150,14 +150,17 @@ def get_json():
     for i in range(len(disk_metrics_list)):
         disk_metrics.append(disk_metrics_list[i].to_dict())
     x = {
-        "machine_name": socket.gethostname(),
-        "collection_time": now.strftime("%m/%d/%Y, %H:%M:%S"),
+        "machine": get_mac_address(),
+        "timestamp": now,
         "app_metrics": app_metrics,
-        "system_metrics": [{"cpu":system_metrics.cpu}, {"ram":system_metrics.ram}],
-        "disk_metrics": disk_metrics,
-        "disk_bytes_written": disk_write_string,
-        "disk_bytes_read": disk_read_string,
-        "network_percent": network_string
+        "system_metrics": {
+            "cpu":system_metrics.cpu,
+            "ram":system_metrics.ram,
+            "disk_metrics": disk_metrics,
+            "disk_bytes_written": disk_write_string,
+            "disk_bytes_read": disk_read_string,
+            "network_percent": network_string
+        }
     }
     return json.dumps(x)
 
