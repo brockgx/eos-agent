@@ -39,8 +39,6 @@ enable_data_collection()
 time.sleep(10)
 data_collection(api_endpoint+"/metrics/commitmetrics", 10, 150)
 
-#Start collection thread loop (thread 1)
-
 #Setup socket listeners (start listening loops)
 #Socket on main port for handling commands (thread 2)
 create_socket(agent_config_details["server_ip"], agent_config_details["socket_mport"])
