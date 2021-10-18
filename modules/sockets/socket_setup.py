@@ -1,5 +1,5 @@
 #Import third party libraries
-import socket, time
+import socket, time, select, queue
 
 #Import application specific modules
 from ..utilities.agent_core import print_log_msg, create_new_thread
@@ -60,3 +60,14 @@ def accept_new_connections(agent_socket):
   #Save connection details
   all_socket_connections.append(conn)
   all_message_queues[conn] = queue.Queue()
+  
+#This will be the main function for handling requests
+def agent_request_handling(agent_socket):
+  all_socket_connections = [agent_socket]
+  all_socket_outputs = []
+  all_message_queues = {}
+
+  print_log_msg("Evaluating socket traffic (" + str(agent_socket.getsockname()[1]) + ")...")
+  recv, send, exce = select.select(all_socket_connections, all_socket_outputs, all_socket_connections)
+  
+  print_log_msg("Doing functional stuff")

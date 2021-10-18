@@ -1,4 +1,5 @@
 import os, platform, time, json
+from datetime import datetime
 from modules.utilities.agent_core import get_agent_details, send_agent_details, data_collection
 from modules.utilities.config_setup import retreive_config_details
 from modules.sockets.socket_setup import create_socket
@@ -25,7 +26,7 @@ api_endpoint += str(agent_config_details["server_ip"])+":"+str(agent_config_deta
 #Start up agent, with data collection, socket listeners and loop
 #Sending machine details untill successful
 while True:
-  result = send_agent_details(api_endpoint+"/dash/clientmachines", get_agent_details())
+  result = send_agent_details(api_endpoint+"/dash/clientmachines", get_agent_details(agent_config_details))
   if result:
     break
   time.sleep(DELAY_TIME)
@@ -35,7 +36,7 @@ while True:
 #possibly collating info and sending every 5 mins
 enable_data_collection()
 time.sleep(10)
-data_collection(api_endpoint+"/test/addmetrics", 10, 150)
+data_collection(api_endpoint+"/metrics/commitmetrics", 10, 150)
 
 #Start collection thread loop (thread 1)
 
@@ -50,5 +51,5 @@ create_socket(agent_config_details["server_ip"], agent_config_details["socket_sp
 while True:
  time.sleep(DELAY_TIME/2)
  metrics = json.loads(get_json())
- print(str(metrics["collection_time"]) + " - " + str(metrics["machine_name"]) + " - " + str(metrics["system_metrics"][0]["cpu"]))
+ print(str(datetime.fromtimestamp(metrics["timestamp"])) + " - " + str(metrics["machine"]) + " - " + str(metrics["system_metrics"]["cpu"]))
   
