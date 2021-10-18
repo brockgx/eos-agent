@@ -48,7 +48,7 @@ def get_list_of_processes(list_processes):
             process_name = proc.name()
             process_pid = proc.pid()
             if process_name != "":
-                list_processes.append(application(process_pid, process_name, round(proc.cpu_percent()/cpu_count,2), round(proc.memory_percent(),2)))
+                list_processes.append(application(str(process_pid), process_name, round(proc.cpu_percent()/cpu_count,2), round(proc.memory_percent(),2)))
 
             
         #print(process_name , ' ::: ', processID)
