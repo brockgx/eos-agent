@@ -93,7 +93,7 @@ def runAgentCommands(agentSocket):
   while True:
     data = receiveSocketData(agentSocket)
 
-    print(data)
+    #print(data)
 
     if data == 'Data_Request':
       sendSocketData(agentSocket, "Welcome to the socket for data")
@@ -126,7 +126,7 @@ def fileProcessor(commandJson):
   destination = command['DESTINATION']
   if type == "file":
     print("File Received")
-    print(b64file)
+    #print(b64file)
     file = base64.b64decode(b64file)
     outFileHandle = open(destination, "wb")
     outFileHandle.write(file)
