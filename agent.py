@@ -6,6 +6,7 @@ from modules.sockets.socket_setup import create_socket
 from modules.metrics.client_metrics import start_agent as enable_data_collection
 from modules.metrics.client_metrics import get_json
 
+
 #Define any constant expressions
 DELAY_TIME = 20
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
@@ -48,8 +49,8 @@ create_socket(agent_config_details["server_ip"], agent_config_details["socket_sp
 
 #Thread 4, a thread checker? Plus all Keegans threads
 
-while True:
- time.sleep(DELAY_TIME/2)
- metrics = json.loads(get_json())
- print(str(datetime.fromtimestamp(metrics["timestamp"])) + " - " + str(metrics["machine"]) + " - " + str(metrics["system_metrics"]["cpu"]))
-  
+# while True:
+#   pass
+#  time.sleep(DELAY_TIME/2)
+#  metrics = json.loads(get_json())
+#  print(str(metrics["collection_time"]) + " - " + str(metrics["machine_name"]) + " - " + str(metrics["system_metrics"][0]["cpu"]))

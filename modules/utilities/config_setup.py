@@ -1,5 +1,7 @@
 #Import third party libraries
 from configparser import ConfigParser
+import sys
+
 
 ## Functions ##
 #Function: Read and save the details from the config file
@@ -18,8 +20,8 @@ def retreive_config_details(file_path):
       if key.upper() not in required_properties:
         raise ValueError("Invalid property " + key.upper() + " in config file (" + str(file_path) + ")", ",".join(required_properties))
   except ValueError as err:
-    print_log_msg(str(err.args[0]))
-    print_log_msg("Looking for properties: " + str(err.args[1:]))
+    print(str(err.args[0]))
+    print("Looking for properties: " + str(err.args[1:]))
     sys.exit(1)
   return {
       "server_ip": details["server_address"],
