@@ -5,7 +5,7 @@ global fileSecret
 
 def do_encrypt(Message):
     try:
-        KeyFile = open("/home/devmain/uni-work/agent-resources/eos-agent/modules/security/PassIV","r")
+        KeyFile = open("/home/kali/Desktop/Swinburne/Agent/EncryptionBranch/eos-agent/modules/security/PassIV","r")
     except IOError as err:
         print(err)
     KeyFileLines = KeyFile.read().splitlines()
@@ -18,7 +18,7 @@ def do_encrypt(Message):
 
 def do_decrypt(Message):
     try:
-        KeyFile = open("/home/devmain/uni-work/agent-resources/eos-agent/modules/security/PassIV","r")
+        KeyFile = open("/home/kali/Desktop/Swinburne/Agent/EncryptionBranch/eos-agent/modules/security/PassIV","r")
     except IOError as err:
         print(err)
     KeyFileLines = KeyFile.read().splitlines()
