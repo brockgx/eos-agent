@@ -1,11 +1,13 @@
 import os, platform, time, json
 from datetime import datetime
+from modules.utilities.agent_logging import agent_logger
 from modules.utilities.agent_core import get_agent_details, send_agent_details, data_collection
 from modules.utilities.config_setup import retreive_config_details
 from modules.sockets.socket_setup import create_socket
 from modules.metrics.client_metrics import start_agent as enable_data_collection
 from modules.metrics.client_metrics import get_json
 
+agent_logger.info("Starting the agent on {}.".format(platform.node()))
 
 #Define any constant expressions
 DELAY_TIME = 20
@@ -27,7 +29,7 @@ api_endpoint += str(agent_config_details["server_ip"])+":"+str(agent_config_deta
 #Start up agent, with data collection, socket listeners and loop
 #Sending machine details untill successful
 while True:
-  result = send_agent_details(api_endpoint+"/dash/clientmachines", get_agent_details(agent_config_details))
+  result = send_agent_details(api_endpoint+"/dash/clientmachines", get_agent_details(agent_config_details), DELAY_TIME)
   if result:
     break
   time.sleep(DELAY_TIME)
@@ -35,8 +37,6 @@ while True:
 #Start the data collection unit
 #combine metric collector with metric sender
 #possibly collating info and sending every 5 mins
-enable_data_collection()
-time.sleep(5)
 data_collection(api_endpoint+"/metrics/commitmetrics", 10, 180)
 
 #Setup socket listeners (start listening loops)
