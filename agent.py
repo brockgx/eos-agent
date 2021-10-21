@@ -41,9 +41,9 @@ data_collection(api_endpoint+"/metrics/commitmetrics", 10, 180)
 
 #Setup socket listeners (start listening loops)
 #Socket on main port for handling commands (thread 2)
-create_socket(agent_config_details["server_ip"], agent_config_details["socket_mport"])
+create_socket("127.0.0.1", agent_config_details["socket_mport"])
 #Socket on secondary port for handling data (may not be needed) (thread 3)
-create_socket(agent_config_details["server_ip"], agent_config_details["socket_sport"])
+create_socket("127.0.0.1", agent_config_details["socket_sport"])
 
 #Thread 4, a thread checker? Plus all Keegans threads
 
