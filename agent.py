@@ -36,7 +36,7 @@ while True:
 #combine metric collector with metric sender
 #possibly collating info and sending every 5 mins
 enable_data_collection()
-time.sleep(10)
+time.sleep(5)
 data_collection(api_endpoint+"/metrics/commitmetrics", 10, 180)
 
 #Setup socket listeners (start listening loops)
