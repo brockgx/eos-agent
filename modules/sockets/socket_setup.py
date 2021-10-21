@@ -1,5 +1,5 @@
 #Import third party libraries
-import socket, time,select,queue
+import socket, time, select, queue, json
 
 #Import application specific modules
 from ..utilities.agent_core import print_log_msg, create_new_thread
@@ -78,12 +78,15 @@ def mainFunction(sock):
         connection.setblocking(0)
         allSocketConnections.append(connection)
         allMessageQueues[connection] = queue.Queue()
-        
       else:
         data = receiveSocketData(read)
         if data:
+          json_data = json.loads(data)
           print("Receieved: " + str(data) + " from (" + str(read.getpeername()) + ").")
-          allMessageQueues[read].put(data)
+          if json_data["type"] == "fileupload":
+            allMessageQueues[read].put(json_data["details"]["msg"])
+          elif json_data["type"] == "precommand":
+            allMessageQueues[read].put(json_data["details"]["cmd"])
           if read not in allSocketOutputs:
             allSocketOutputs.append(read)
         else:
