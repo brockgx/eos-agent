@@ -7,6 +7,7 @@ from modules.sockets.socket_setup import create_socket
 from modules.metrics.client_metrics import start_agent as enable_data_collection
 from modules.metrics.client_metrics import get_json
 
+agent_logger.debug("=================================================")
 agent_logger.info("Starting the agent on {}.".format(platform.node()))
 
 #Define any constant expressions
