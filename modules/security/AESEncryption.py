@@ -1,11 +1,17 @@
 from Crypto.Cipher import AES
-import secrets
-import pickle
+import secrets, os
+from platform import system
 global fileSecret
+
+FILEDIR = os.path.abspath(os.path.dirname(__file__))
+if system() == "Windows":
+  KEY_PATH = FILEDIR + "\\PassIV"
+else:
+  KEY_PATH = FILEDIR + "/PassIV"
 
 def do_encrypt(Message):
     try:
-        KeyFile = open("/home/kali/Desktop/Swinburne/Agent/EncryptionBranch/eos-agent/modules/security/PassIV","r")
+        KeyFile = open(KEY_PATH, "r")
     except IOError as err:
         print(err)
     KeyFileLines = KeyFile.read().splitlines()
@@ -18,7 +24,7 @@ def do_encrypt(Message):
 
 def do_decrypt(Message):
     try:
-        KeyFile = open("/home/kali/Desktop/Swinburne/Agent/EncryptionBranch/eos-agent/modules/security/PassIV","r")
+        KeyFile = open(KEY_PATH, "r")
     except IOError as err:
         print(err)
     KeyFileLines = KeyFile.read().splitlines()

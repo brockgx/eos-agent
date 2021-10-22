@@ -37,14 +37,19 @@ while True:
 #combine metric collector with metric sender
 #possibly collating info and sending every 5 mins
 enable_data_collection()
+<<<<<<< HEAD
 time.sleep(10)
 data_collection(api_endpoint+"/metrics/commitmetrics", 10, 120)
+=======
+time.sleep(5)
+data_collection(api_endpoint+"/metrics/commitmetrics", 10, 180)
+>>>>>>> 6dd365627b925be857be05dc960c929eb1b6a35a
 
 #Setup socket listeners (start listening loops)
 #Socket on main port for handling commands (thread 2)
-create_socket(agent_config_details["server_ip"], agent_config_details["socket_mport"])
+create_socket("127.0.0.1", agent_config_details["socket_mport"])
 #Socket on secondary port for handling data (may not be needed) (thread 3)
-create_socket(agent_config_details["server_ip"], agent_config_details["socket_sport"])
+create_socket("127.0.0.1", agent_config_details["socket_sport"])
 
 #Thread 4, a thread checker? Plus all Keegans threads
 
