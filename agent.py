@@ -38,7 +38,7 @@ while True:
 #possibly collating info and sending every 5 mins
 enable_data_collection()
 time.sleep(10)
-data_collection(api_endpoint+"/metrics/commitmetrics", 10, 180)
+data_collection(api_endpoint+"/metrics/commitmetrics", 10, 120)
 
 #Setup socket listeners (start listening loops)
 #Socket on main port for handling commands (thread 2)
