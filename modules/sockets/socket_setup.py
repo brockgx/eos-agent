@@ -83,11 +83,14 @@ def mainFunction(sock):
         data = receiveSocketData(read)
         if data:
           json_data = json.loads(data)
-          agent_logger.info("Receieved {} from ({}).".format(data, read.getpeername()))
+          agent_logger.info("Command data receieved {} from ({}).".format(data, read.getpeername()))
           if json_data["type"] == "fileupload":
             allMessageQueues[read].put(json_data["details"]["msg"])
-          elif json_data["type"] == "precommand":
-            allMessageQueues[read].put(json_data["details"]["cmd"])
+          elif json_data["type"] == "appshutdown":
+            agent_logger.info("Attempting to stop application with name: {} and PID: {}.".format(json_data["details"]["app_name"], json_data["details"]["app_pid"]))
+            allMessageQueues[read].put(json_data["details"]["app_name"])
+            time.sleep(2)
+            agent_logger.info("Application with details: ({},{}) stopped.".format(json_data["details"]["app_name"], json_data["details"]["app_pid"]))
           if read not in allSocketOutputs:
             allSocketOutputs.append(read)
         else:
@@ -102,10 +105,10 @@ def mainFunction(sock):
       try:
         next_msg = allMessageQueues[write].get_nowait()
       except queue.Empty:
-        agent_logger.warning("Output queue for {} is empty.".format(write.getpeername()))
+        #agent_logger.warning("Output queue for {} is empty.".format(write.getpeername()))
         allSocketOutputs.remove(write)
       else:
-        agent_logger.info("Sending {} to {}.".format(next_msg, write.getpeername()))
+        #agent_logger.info("Sending {} to {}.".format(next_msg, write.getpeername()))
         sendSocketData(write, next_msg)
         allSocketConnections.remove(write) #removing the connection from list after sending
 

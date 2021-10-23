@@ -80,7 +80,7 @@ def data_processing(api_route, collection_interval, post_interval):
       metrics.append(data)
       time.sleep(collection_interval)
     
-    agent_logger.info("{} has been reached sending data to {}.".format(round(post_interval/60), server_address_route))
+    agent_logger.info("{} minutes has been reached sending data to {}.".format(round(post_interval/60), api_route))
     requests.post(api_route, json={"content": metrics})
 
 #Function: Thread Data collection

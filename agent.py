@@ -20,6 +20,7 @@ else:
 
 #Import the config
 agent_config_details = retreive_config_details(CONFIG_PATH)
+agent_logger.info("Agent configuration options: {}".format(agent_config_details))
 
 #Server API address
 api_endpoint = "http://"
