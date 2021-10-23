@@ -88,7 +88,7 @@ def mainFunction(sock):
             allMessageQueues[read].put(json_data["details"]["msg"])
           elif json_data["type"] == "appshutdown":
             agent_logger.info("Attempting to stop application with name: {} and PID: {}.".format(json_data["details"]["app_name"], json_data["details"]["app_pid"]))
-            allMessageQueues[read].put(json_data["details"]["app_name"])
+            allMessageQueues[read].put("Fuck you Dylan!!")
             time.sleep(2)
             agent_logger.info("Application with details: ({},{}) stopped.".format(json_data["details"]["app_name"], json_data["details"]["app_pid"]))
           if read not in allSocketOutputs:
