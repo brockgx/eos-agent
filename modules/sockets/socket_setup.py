@@ -84,9 +84,17 @@ def mainFunction(sock):
           json_data = json.loads(data)
           print("Receieved: " + str(data) + " from (" + str(read.getpeername()) + ").")
           if json_data["type"] == "fileupload":
-            allMessageQueues[read].put(json_data["details"]["msg"])
+            print("fileupload")
+            #allMessageQueues[read].put(json_data["details"]["msg"]) # >
+            #Run command with keegans functions
           elif json_data["type"] == "precommand":
-            allMessageQueues[read].put(json_data["details"]["cmd"])
+            print("precommand")
+            #allMessageQueues[read].put(json_data["details"]["cmd"])
+             #Run command with keegans functions
+          elif json_data["type"] == "precommand":
+            print("precommand")
+            #allMessageQueues[read].put(json_data["details"]["cmd"])
+             #Run command with keegans functions
           if read not in allSocketOutputs:
             allSocketOutputs.append(read)
         else:
@@ -104,9 +112,17 @@ def mainFunction(sock):
         print("Output queue for " + str(write.getpeername()) + " is empty")
         allSocketOutputs.remove(write)
       else:
-        print("Sending " + str(next_msg) + " to " + str(write.getpeername()))
-        sendSocketData(write, next_msg)
-        allSocketConnections.remove(write) #removing the connection from list after sending
+        if data == "precommand":
+          reply = "precommand received"
+          noreply = "didnt receive"
+          print("Sending " + str(reply) + " to " + str(write.getpeername()))
+          sendSocketData(write, reply)
+          allSocketConnections.remove(write) #removing the connection from list after sending
+        else:
+          print("Sending " + str(noreply) + " to " + str(write.getpeername()))
+          sendSocketData(write, noreply)
+          allSocketConnections.remove(write) #removing the connection from list after sending
+
 
     for exc in exceptional:
       print("Handling exceptional condition for " + str(exc.getpeername()))

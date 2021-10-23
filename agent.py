@@ -22,8 +22,7 @@ agent_config_details = retreive_config_details(CONFIG_PATH)
 api_endpoint = "http://"
 if agent_config_details["server_https_enabled"] == "true":
   api_endpoint = "https://"
-api_endpoint += "bd80-122-104-255-94.ngrok.io"
-#str(agent_config_details["server_ip"])+":"+str(agent_config_details["server_port"])
+api_endpoint += str(agent_config_details["server_ip"])+":"+str(agent_config_details["server_port"])
 
 #Start up agent, with data collection, socket listeners and loop
 #Sending machine details untill successful
@@ -37,13 +36,8 @@ while True:
 #combine metric collector with metric sender
 #possibly collating info and sending every 5 mins
 enable_data_collection()
-<<<<<<< HEAD
-time.sleep(10)
-data_collection(api_endpoint+"/metrics/commitmetrics", 10, 120)
-=======
 time.sleep(5)
 data_collection(api_endpoint+"/metrics/commitmetrics", 10, 180)
->>>>>>> 6dd365627b925be857be05dc960c929eb1b6a35a
 
 #Setup socket listeners (start listening loops)
 #Socket on main port for handling commands (thread 2)
