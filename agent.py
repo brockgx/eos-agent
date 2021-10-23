@@ -22,7 +22,7 @@ agent_config_details = retreive_config_details(CONFIG_PATH)
 api_endpoint = "http://"
 if agent_config_details["server_https_enabled"] == "true":
   api_endpoint = "https://"
-api_endpoint += str(agent_config_details["server_ip"])+":"+str(agent_config_details["server_port"])
+api_endpoint += "bd80-122-104-255-94.ngrok.io"#+= str(agent_config_details["server_ip"])+":"+str(agent_config_details["server_port"])
 
 #Start up agent, with data collection, socket listeners and loop
 #Sending machine details untill successful
