@@ -81,17 +81,18 @@ def mainFunction(sock):
       else:
         data = receiveSocketData(read)
         if data:
-          json_data = json.loads(data)
+          #json_data = json.loads(data)
           print("Receieved: " + str(data) + " from (" + str(read.getpeername()) + ").")
-          if json_data["type"] == "fileupload":
+          if data == "fileupload":
             print("fileupload")
             #allMessageQueues[read].put(json_data["details"]["msg"]) # >
             #Run command with keegans functions
-          elif json_data["type"] == "precommand":
+          elif data == "precommand":
             print("precommand")
+            sendSocketData(read, data)
             #allMessageQueues[read].put(json_data["details"]["cmd"])
              #Run command with keegans functions
-          elif json_data["type"] == "precommand":
+          elif data == "command":
             print("precommand")
             #allMessageQueues[read].put(json_data["details"]["cmd"])
              #Run command with keegans functions
