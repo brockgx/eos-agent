@@ -1,54 +1,49 @@
 import os, platform, time, json
 from datetime import datetime
+from modules.utilities.logging_setup import agent_logger
 from modules.utilities.agent_core import get_agent_details, send_agent_details, data_collection
-from modules.utilities.config_setup import retreive_config_details
+from modules.utilities.config_setup import get_config_details
 from modules.sockets.socket_setup import create_socket
 from modules.metrics.client_metrics import start_agent as enable_data_collection
 from modules.metrics.client_metrics import get_json
 
-
 #Define any constant expressions
 DELAY_TIME = 20
-BASEDIR = os.path.abspath(os.path.dirname(__file__))
-if platform.system() == "Windows":
-  CONFIG_PATH = BASEDIR + "\\agent-config.cfg"
-else:
-  CONFIG_PATH = BASEDIR + "/agent-config.cfg"
 
 #Import the config
-agent_config_details = retreive_config_details(CONFIG_PATH)
+agent_config_details = get_config_details()
 
-#Server API address
-api_endpoint = "http://"
-if agent_config_details["server_https_enabled"] == "true":
-  api_endpoint = "https://"
-api_endpoint += "bd80-122-104-255-94.ngrok.io"#+= str(agent_config_details["server_ip"])+":"+str(agent_config_details["server_port"])
+if agent_config_details != False:
+  agent_logger.debug("=================================================")
+  agent_logger.info("Starting the agent on {}.".format(platform.node()))
+  agent_logger.info("Agent configuration options: {}".format(agent_config_details))
 
-#Start up agent, with data collection, socket listeners and loop
-#Sending machine details untill successful
-while True:
-  result = send_agent_details(api_endpoint+"/dash/clientmachines", get_agent_details(agent_config_details))
-  if result:
-    break
-  time.sleep(DELAY_TIME)
+  #Server API address
+  api_endpoint = "http://"
+  if agent_config_details["SERVER-DETAILS"]["HTTPS-ENABLED"]:
+    api_endpoint = "https://"
+  if agent_config_details["SERVER-DETAILS"]["PORT-ENABLED"]:
+    api_endpoint += str(agent_config_details["SERVER-DETAILS"]["SERVER-ADDRESS"])+":"+str(agent_config_details["SERVER-DETAILS"]["SERVER-PORT"])
+  else:
+    api_endpoint += str(agent_config_details["SERVER-DETAILS"]["SERVER-ADDRESS"])
 
-#Start the data collection unit
-#combine metric collector with metric sender
-#possibly collating info and sending every 5 mins
-enable_data_collection()
-time.sleep(10)
-data_collection(api_endpoint+"/metrics/commitmetrics", 10, 180)
+  #Start up agent, with data collection, socket listeners and loop
+  #Sending machine details untill successful
+  while True:
+    result = send_agent_details(api_endpoint+"/dash/clientmachines", get_agent_details(agent_config_details["SOCKET-DETAILS"]["MAIN-PORT"],agent_config_details["SOCKET-DETAILS"]["SECONDARY-PORT"]), DELAY_TIME)
+    if result:
+      break
+    time.sleep(DELAY_TIME)
 
-#Setup socket listeners (start listening loops)
-#Socket on main port for handling commands (thread 2)
-create_socket(agent_config_details["server_ip"], agent_config_details["socket_mport"])
-#Socket on secondary port for handling data (may not be needed) (thread 3)
-create_socket(agent_config_details["server_ip"], agent_config_details["socket_sport"])
+  #Start the data collection unit
+  #combine metric collector with metric sender
+  #possibly collating info and sending every 5 mins
+  data_collection(api_endpoint+"/metrics/commitmetrics", 10, 180)
 
-#Thread 4, a thread checker? Plus all Keegans threads
-
-# while True:
-#   pass
-#  time.sleep(DELAY_TIME/2)
-#  metrics = json.loads(get_json())
-#  print(str(metrics["collection_time"]) + " - " + str(metrics["machine_name"]) + " - " + str(metrics["system_metrics"][0]["cpu"]))
+  #Setup socket listeners (start listening loops)
+  #Socket on main port for handling commands (thread 2)
+  create_socket("127.0.0.1", agent_config_details["SOCKET-DETAILS"]["MAIN-PORT"])
+  #Socket on secondary port for handling data (may not be needed) (thread 3)
+  create_socket("127.0.0.1", agent_config_details["SOCKET-DETAILS"]["SECONDARY-PORT"])
+else:
+  agent_logger.critical("Failed to start the Agent, issue with config file.")
