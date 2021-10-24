@@ -3,7 +3,7 @@ from ..security.AESEncryption import do_encrypt, do_decrypt
 
 #Constants
 HEADERSIZE = 10
-RECVSIZE = 16
+RECVSIZE = 1024
 
 #Global variables
 
@@ -15,9 +15,9 @@ def sendSocketData(socketConn, message):
 
   #Send the message if available
   try:
-    socketConn.sendall(encryptedtestLen.encode())
-    socketConn.sendall(b'\0')
-    socketConn.sendall(encryptedMsg)
+    #socketConn.sendall(encryptedtestLen.encode())
+    #socketConn.sendall(b'\0')
+    socketConn.sendall(encryptedtestLen.encode() + b'\0' + encryptedMsg)
   except Exception as error:
     print("Failure message")
     print(str(error))

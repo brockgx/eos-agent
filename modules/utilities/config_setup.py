@@ -1,32 +1,73 @@
-#Import third party libraries
-from configparser import ConfigParser
-import sys
+from os import path
+from platform import system
+import yaml
 
+from .logging_setup import agent_logger
+#import yaml, os, platform
 
-## Functions ##
-#Function: Read and save the details from the config file
-#Params:
-#   - file_path: the location of the config file
-#Returned:
-#   - Dict object of the config details
-def retreive_config_details(file_path):
-  config = ConfigParser()
-  config.read(file_path)
+def read_config_file():
+  #Get the directory of the configuration file
+  CONFIG_DIR = path.abspath(path.join(__file__,"../../../"))
+  if system() == "Windows":
+    CONFIG_PATH = CONFIG_DIR + "\\agent_config.yml"
+  else:
+    CONFIG_PATH = CONFIG_DIR + "/agent_config.yml"
 
-  required_properties = ["SERVER_ADDRESS", "SERVER_PORT", "HTTPS_ENABLED", "MAIN_PORT", "SECONDARY_PORT"]
-  details = {**config['server-details'], **config['socket-details']}
   try:
-    for key in details:
-      if key.upper() not in required_properties:
-        raise ValueError("Invalid property " + key.upper() + " in config file (" + str(file_path) + ")", ",".join(required_properties))
-  except ValueError as err:
-    print(str(err.args[0]))
-    print("Looking for properties: " + str(err.args[1:]))
-    sys.exit(1)
-  return {
-      "server_ip": details["server_address"],
-      "server_port": int(details["server_port"]),
-      "server_https_enabled": details["https_enabled"],
-      "socket_mport": int(details["main_port"]),
-      "socket_sport": int(details["secondary_port"]),
+    with open(CONFIG_PATH, "r") as ymlfile:
+      return yaml.safe_load(ymlfile)
+  except FileNotFoundError as err_msg:
+    agent_logger.critical("Config file missing - {}.".format(str(err_msg)))
+    return False
+  except Exception as err_msg:
+    agent_logger.critical("Could not load conifg file details - {}.".format(str(err_msg)))
+    return False
+
+#Config file is loading successfully, now need to validate entries in file
+#Then return all the entries once valid
+def validate_sections(config_dets, sections):
+  for valid_sec in sections:
+    if valid_sec not in config_dets:
+      agent_logger.error("Missing section {} in config file.".format(valid_sec))
+      return False
+
+  return True
+
+def validate_section_details(config_dets, items, types):
+  for item in items:
+    if item in config_dets:
+      if isinstance(config_dets[item],types[items.index(item)]):
+        result = True
+      else:
+        agent_logger.error("{} must be of type {}".format(str(config_dets[item]), str(types[items.index(item)])))
+        return False
+    else:
+      agent_logger.error("Missing detail {} in config file".format(str(item)))
+      return False
+  return True
+    
+    
+def validate_config_details():
+  #Read config file
+  cfg = read_config_file()
+  if cfg != False:
+    #Validate sections
+    all_items = {
+      "SERVER-DETAILS": {"names": ["SERVER-ADDRESS","SERVER-PORT","PORT-ENABLED","HTTPS-ENABLED"], "types": [str,int,bool,bool]},
+      "SOCKET-DETAILS": {"names": ["MAIN-PORT","SECONDARY-PORT"], "types": [int,int]} 
     }
+    sections_valid = validate_sections(cfg, all_items)
+    #Validate values
+    if sections_valid:
+      for section in all_items:
+        valid_items = validate_section_details(cfg[section], all_items[section]["names"], all_items[section]["types"])
+        if not valid_items:
+          return False
+      return cfg
+    else:
+      return False
+  else:
+    return False
+
+def get_config_details():
+  return validate_config_details()
