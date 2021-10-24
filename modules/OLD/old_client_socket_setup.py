@@ -2,10 +2,14 @@
 import socket
 import threading
 import time
+import json
+import subprocess
+import base64
 
 #Import in house libraries
 from .socket_data_transfer import sendSocketData, receiveSocketData
 from ..metrics.client_metrics import start_agent, get_json
+from ..commands.client_commands import shutdown
 
 #Define any constant expressions
 AGENT_SOCKET_DETAILS = {
@@ -89,7 +93,7 @@ def runAgentCommands(agentSocket):
   while True:
     data = receiveSocketData(agentSocket)
 
-    print(data)
+    #print(data)
 
     if data == 'Data_Request':
       sendSocketData(agentSocket, "Welcome to the socket for data")
@@ -97,12 +101,75 @@ def runAgentCommands(agentSocket):
       sendSocketData(agentSocket, "Welcome to the socket for messaging")
     if data == 'PINGING':
       sendSocketData(agentSocket, "I'm Alive")
-    if data == 'Command':
+    if data.startswith("CMD"):
+      left, right = data.split('\n')
+      commandProcessor(right)
       sendSocketData(agentSocket, "Command successful")
+    if data.startswith("SHELL"):
+      left, right = data.split('\n')
+      result = shellProcessor(right)
+      sendSocketData(agentSocket, result)
+    if data.startswith("FILE"):
+      left, right = data.split('\n')
+      result = fileProcessor(right)
+      sendSocketData(agentSocket, result)
     if data == 'JSON':
       json_output = get_json()
       sendSocketData(agentSocket,json_output)
+      
+def fileProcessor(commandJson):
+  print("File Processor")
+  #print(commandJson)
+  command = json.loads(commandJson)
+  type = command['TYPE']
+  b64file = command['FILE']
+  destination = command['DESTINATION']
+  if type == "file":
+    print("File Received")
+    #print(b64file)
+    file = base64.b64decode(b64file)
+    outFileHandle = open(destination, "wb")
+    outFileHandle.write(file)
+    result = "File Written to " + destination
+    print(result)
+    return result
 
+
+def commandProcessor(commandJson):
+  print("JSON Command Processor")
+  #print(commandJson)
+  command = json.loads(commandJson)
+  type = command['TYPE']
+  attribute = command['ATTRIBUTE']
+  if type == "command":
+    print("Command Received")
+    print(attribute)
+    if attribute == "shutdown":
+      print("Shutdown Initiated")
+      shutdown()
+    elif attribute == "reset":
+      print("Reset Initiated")
+      
+def shellProcessor(commandJson):
+  print("Shell command")
+  #print(commandJson)
+  command = json.loads(commandJson)
+  type = command['TYPE']
+  attribute = command['ATTRIBUTE']
+  if type == "shell":
+    print("Shell Command Received")
+    print(attribute)
+    left = ""
+    right = ""
+    if ' ' in attribute:
+      pos = attribute.find(' ')+1
+      left, right = attribute[:pos], attribute[pos:]
+    else:
+      left = attribute
+    result = subprocess.run([left, right], capture_output=True).stdout.decode('utf-8')
+    print(result)
+    return result
+    # run attribute
 
 def setupAgentSocket(socketNum):
   newSocket = configureSocket(AGENT_SOCKET_DETAILS['AGENT_IP'], AGENT_SOCKET_DETAILS['AGENT_PORTS'][socketNum])
