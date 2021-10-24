@@ -91,6 +91,11 @@ def mainFunction(sock):
             allMessageQueues[read].put("Fuck you Dylan!!")
             time.sleep(2)
             agent_logger.info("Application with details: ({},{}) stopped.".format(json_data["details"]["app_name"], json_data["details"]["app_pid"]))
+          elif json_data["type"] == "precommand":
+            print("Precommand Received")
+            #run the function
+            sendSocketData(read, "precommand ran successfully")
+            allSocketConnections.remove(read)
           if read not in allSocketOutputs:
             allSocketOutputs.append(read)
         else:
