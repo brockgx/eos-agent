@@ -85,12 +85,47 @@ def mainFunction(sock):
           json_data = json.loads(data)
           agent_logger.info("Command data receieved {} from ({}).".format(data, read.getpeername()))
           if json_data["type"] == "fileupload":
-            allMessageQueues[read].put(json_data["details"]["msg"])
-          elif json_data["type"] == "appshutdown":
-            agent_logger.info("Attempting to stop application with name: {} and PID: {}.".format(json_data["details"]["app_name"], json_data["details"]["app_pid"]))
-            allMessageQueues[read].put("Fuck you Dylan!!")
+            print("fileupload Received")
+            agent_logger.info("Attempting to upload the file: {} at destination: {}.".format(json_data["parameters"]["file"], json_data["parameters"]["destination"]))
+            #fileuplaod function
+            allMessageQueues[read].put("File Uploaded") #msg back to server
             time.sleep(2)
-            agent_logger.info("Application with details: ({},{}) stopped.".format(json_data["details"]["app_name"], json_data["details"]["app_pid"]))
+            agent_logger.info("File: {} uploaded at destination: {}.".format(json_data["parameters"]["file"], json_data["parameters"]["destination"]))
+          elif json_data["type"] == "appshutdown":
+            print("appshutdown Received")
+            agent_logger.info("Attempting to stop application with name: {} and PID: {}.".format(json_data["parameters"]["app_name"], json_data["parameters"]["app_id"]))
+            #appshutdown fucntion
+            allMessageQueues[read].put("Shutting Down the app")
+            time.sleep(2)
+            agent_logger.info("Application with details: ({},{}) stopped.".format(json_data["parameters"]["app_name"], json_data["parameters"]["app_id"]))
+          elif json_data["type"] == "restartmachine":
+            print("restartmachine Received")
+            agent_logger.info("Attempting to restart machine {} .".format(json_data["machine_name"]))
+            #run the function
+            allMessageQueues[read].put("Restarted the machine")
+            time.sleep(2)
+            agent_logger.info("Restarted machine {} .".format(json_data["machine_name"]))
+          elif json_data["type"] == "restartapp":
+            print("restartapp Received")
+            agent_logger.info("Attempting to restart application with name: {} and PID: {}.".format(json_data["parameters"]["app_name"], json_data["parameters"]["app_id"]))
+            #run the function
+            allMessageQueues[read].put("Restarting  the app")
+            time.sleep(2)
+            agent_logger.info("Application with details: ({},{}) restarted.".format(json_data["parameters"]["app_name"], json_data["parameters"]["app_id"]))
+          elif json_data["type"] == "custom_command":
+            print("custom Received")
+            agent_logger.info("Attempting to run the command: {} on machine: {}.".format(json_data["parameters"]["custom_command"], json_data["machine_name"]))
+            #run the function
+            allMessageQueues[read].put("custom command")
+            time.sleep(2)
+            agent_logger.info("Command ran sucessfully on machine {}.".format(json_data["machine_name"]))
+          elif json_data["type"] == "shutdownmachine":
+            print("shutdownmachine Received")
+            agent_logger.info("Attempting to shutdown machine {} .".format(json_data["machine_name"]))
+            #run the function
+            allMessageQueues[read].put("Machine Shutdown")
+            time.sleep(2)
+            agent_logger.info("Machine Shutdown: {} .".format(json_data["machine_name"]))
           if read not in allSocketOutputs:
             allSocketOutputs.append(read)
         else:
@@ -119,4 +154,3 @@ def mainFunction(sock):
         allSocketOutputs.remove(exc)
       exc.close()
       del allMessageQueues[exc]
-

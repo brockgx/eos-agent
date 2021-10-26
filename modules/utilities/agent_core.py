@@ -77,6 +77,7 @@ def data_processing(api_route, collection_interval, post_interval):
 
     while datetime.timestamp(datetime.now()) < timeout_start + timeout:
       data = json.loads(get_json())
+      #print(data)
       metrics.append(data)
       time.sleep(collection_interval)
     
