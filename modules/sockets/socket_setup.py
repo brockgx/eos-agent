@@ -1,6 +1,8 @@
 #Import third party libraries
 import socket, time, select, queue, json
 
+from modules.commands.client_commands import jsonProcessor
+
 #Import application specific modules
 from ..utilities.logging_setup import agent_logger
 from ..utilities.agent_core import print_log_msg, create_new_thread
@@ -84,6 +86,12 @@ def mainFunction(sock):
         if data:
           json_data = json.loads(data)
           agent_logger.info("Command data receieved {} from ({}).".format(data, read.getpeername()))
+
+          result = jsonProcessor(json_data)
+          allMessageQueues[read].put(result)
+
+          """
+
           if json_data["type"] == "fileupload":
             print("fileupload Received")
             agent_logger.info("Attempting to upload the file: {} at destination: {}.".format(json_data["parameters"]["file"], json_data["parameters"]["destination"]))
@@ -126,6 +134,9 @@ def mainFunction(sock):
             allMessageQueues[read].put("Machine Shutdown")
             time.sleep(2)
             agent_logger.info("Machine Shutdown: {} .".format(json_data["machine_name"]))
+
+        """
+
           if read not in allSocketOutputs:
             allSocketOutputs.append(read)
         else:
