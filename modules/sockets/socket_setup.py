@@ -154,7 +154,7 @@ def mainFunction(sock):
         #agent_logger.warning("Output queue for {} is empty.".format(write.getpeername()))
         allSocketOutputs.remove(write)
       else:
-        #agent_logger.info("Sending {} to {}.".format(next_msg, write.getpeername()))
+        agent_logger.info("Sending {} to {}.".format(next_msg, write.getpeername()))
         sendSocketData(write, next_msg)
         allSocketConnections.remove(write) #removing the connection from list after sending
 
