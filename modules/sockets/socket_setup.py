@@ -85,17 +85,35 @@ def mainFunction(sock):
           json_data = json.loads(data)
           agent_logger.info("Command data receieved {} from ({}).".format(data, read.getpeername()))
           if json_data["type"] == "fileupload":
-            allMessageQueues[read].put(json_data["details"]["msg"])
-          elif json_data["type"] == "appshutdown":
-            agent_logger.info("Attempting to stop application with name: {} and PID: {}.".format(json_data["details"]["app_name"], json_data["details"]["app_pid"]))
-            allMessageQueues[read].put("Fuck you Dylan!!")
+            print("fileupload Received")
+            agent_logger.info("Attempting to upload the file: {} at destination: {}.".format(json_data["parameters"]["file"], json_data["parameters"]["destination"]))
+            #fileuplaod function
+            allMessageQueues[read].put("File Uploaded") #msg back to server
             time.sleep(2)
-            agent_logger.info("Application with details: ({},{}) stopped.".format(json_data["details"]["app_name"], json_data["details"]["app_pid"]))
-          elif json_data["type"] == "precommand":
+            agent_logger.info("File: {} uploaded at destination: {}.".format(json_data["parameters"]["file"], json_data["parameters"]["destination"]))
+          elif json_data["type"] == "appshutdown":
+            print("appshutdown Received")
+            agent_logger.info("Attempting to stop application with name: {} and PID: {}.".format(json_data["parameters"]["app_name"], json_data["parameters"]["app_pid"]))
+            #appshutdown fucntion
+            allMessageQueues[read].put("Shutting Down the app")
+            time.sleep(2)
+            agent_logger.info("Application with details: ({},{}) stopped.".format(json_data["parameters"]["app_name"], json_data["parameters"]["app_pid"]))
+          elif json_data["type"] == "restartmachine":
             print("Precommand Received")
+            
             #run the function
             sendSocketData(read, "precommand ran successfully")
             allSocketConnections.remove(read)
+          elif json_data["type"] == "restartapp":
+            print("restartapp Received")
+            #run the function
+          elif json_data["type"] == "custom":
+            print("custom Received")
+            #run the function
+          elif json_data["type"] == "shutdownmachine":
+            print("shutdownmachine Received")
+            #run the function
+            agent_logger.info("Attempting to shutdown machine {} .".format(json_data["details"]["app_name"], json_data["details"]["app_pid"]))
           if read not in allSocketOutputs:
             allSocketOutputs.append(read)
         else:
