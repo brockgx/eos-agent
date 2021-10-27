@@ -42,8 +42,8 @@ if agent_config_details != False:
 
   #Setup socket listeners (start listening loops)
   #Socket on main port for handling commands (thread 2)
-  create_socket("127.0.0.1", agent_config_details["SOCKET-DETAILS"]["MAIN-PORT"])
+  create_socket("192.168.56.1", agent_config_details["SOCKET-DETAILS"]["MAIN-PORT"])
   #Socket on secondary port for handling data (may not be needed) (thread 3)
-  create_socket("127.0.0.1", agent_config_details["SOCKET-DETAILS"]["SECONDARY-PORT"])
+  create_socket("192.168.56.1", agent_config_details["SOCKET-DETAILS"]["SECONDARY-PORT"])
 else:
   agent_logger.critical("Failed to start the Agent, issue with config file.")
