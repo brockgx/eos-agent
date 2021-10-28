@@ -7,6 +7,7 @@ from sys import platform
 from enum import Enum
 import threading
 import time
+import psutil
 class OS_TYPE(Enum):
     WINDOWS = 1
     LINUX = 2
@@ -26,24 +27,67 @@ def jsonProcessor(json):
         print("windows")
         os_type = OS_TYPE.WINDOWS
         
-    type = json["type"]
+    json_type = json["type"]
     params = json["parameters"]
-    if json["type"] == "fileupload":
+    if json_type == "fileupload":
         return fileProcessor(params)
-    elif json["type"] == "appshutdown":
-        return "killapp"
-    elif json["type"] == "command":
+    elif json_type == "appshutdown":
+        return appshutdown(params)
+    elif json_type == "apprestart":
+        return apprestart(params)
+    elif json_type == "command":
         return commandProcessor(params)
-    elif json["type"] == "shell":
+    elif json_type == "shell":
         return shellProcessor(params)
+    
+def appshutdown(params):
+    pid = params['pid']
+    name = params['name']
+    try:
+        process = psutil.Process(pid)
+    except:
+        return f"ID:{pid} not found"
+    result = killpid(name, pid, process)
+    return result
+
+def apprestart(params):
+    pid = params['pid']
+    name = params['name']
+    try:
+        process = psutil.Process(pid)
+    except:
+        return f"ID:{pid} not found"
+    exe_path = process.exe()
+    result = killpid(name, pid, process)
+    thread = (threading.Thread(target = thread_run_process, args=[exe_path, ""], daemon=True))
+    thread.start()
+    return result
+
+def killpid(name, pid, process):
+    result = ""
+    if process != None:
+        process.kill()
+        result = f"Process {name} with ID:{pid} terminated successfully."
+    else:
+        result = f"No process with ID:{pid} found."
+    return result
 
 def shutdown():
+    time.sleep(5)
     global os_type
     if os_type == OS_TYPE.WINDOWS:
         os.system("shutdown /s /t 0")
     else: #Linux and Mac
-        os.system("shutdown now -h")
-    
+        os.system("sudo shutdown -h now")
+        
+def restart():
+    time.sleep(5)
+    global os_type
+    if os_type == OS_TYPE.WINDOWS:
+        os.system("shutdown /r /t 0")
+    else: #Linux and Mac
+        os.system("sudo shutdown -r now")
+
 def fileProcessor(params):
     print("File Processor")
     #print(commandJson)
@@ -61,16 +105,14 @@ def fileProcessor(params):
 
 def commandProcessor(params, os_type):
     print("JSON Command Processor")
-    #print(commandJson)
     command = params['command']
-    # App kill
-    # App shutdown
     if command == "shutdown":
         print("Shutdown Initiated")
         shutdown()
         return "Shutdown Initiated."
-    elif command == "reset":
+    elif command == "reset" or command == "restart":
         print("Reset Initiated")
+        restart()
         return "Reset Initiated."
 
 
@@ -82,15 +124,11 @@ def thread_run_process(command, shell):
     ps_command = command
     global os_type
     if os_type == OS_TYPE.WINDOWS:
-        #if shell == "cmd":
-            #ps_command = ["powershell","-Command"]
-            #ps_command.extend(command.split())
         if shell == "powershell":
             ps_command = ["powershell","-Command"]
             ps_command.append(command)
         if shell == "wsl":
             ps_command = "wsl " + command
-
     else: #Linux and Mac
         print("Linux")
     
@@ -114,32 +152,11 @@ def shellProcessor(params):
     command = params['command']
     print("Shell Command Received")
     print(command)
-    #left = ""
-    #right = ""
-    #if ' ' in command:
-    #    pos = command.find(' ')+1
-    #    left, right = command[:pos-1], command[pos:]
-    #else:
-    #    left = command
-    #print("left")
-    #print(left)
-    #print("right")
-    #print(right)
-    #print("[left, right]")
-    #print([left, right])
-    #result = subprocess.run(["powershell", left, right], stdout=subprocess.PIPE, shell=True).stdout.decode('utf-8')
-
     thread = (threading.Thread(target = thread_run_process, args=[command, shell], daemon=True))
     thread.start()
-    #for i in range(len(threads)):
-        #threads[i].daemon = True
-        #threads[i].start()
     time.sleep(5)
-    #threads.remove(0)
     print("Main End")
     global threadOutput
     returnResult = threadOutput
     threadOutput = ""
     return returnResult
-    #print(result)
-    #return result
