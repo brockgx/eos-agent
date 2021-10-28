@@ -85,9 +85,11 @@ def mainFunction(sock):
         data = receiveSocketData(read)
         if data:
           json_data = json.loads(data)
-          agent_logger.info("Command data receieved {} from ({}).".format(data, read.getpeername()))
+          #agent_logger.info("Command data receieved {} from ({}).".format(data, read.getpeername()))
+
           result = jsonProcessor(json_data)
           allMessageQueues[read].put(result)
+
           if read not in allSocketOutputs:
             allSocketOutputs.append(read)
         else:

@@ -2,11 +2,33 @@ import os
 import json
 import base64
 import subprocess
-import time
+from sys import platform
 from ..utilities.logging_setup import agent_logger
 
+from enum import Enum
+import threading
+import time
+import psutil
+class OS_TYPE(Enum):
+    WINDOWS = 1
+    LINUX = 2
+    MAC = 3
+
+os_type = OS_TYPE.WINDOWS
+
 def jsonProcessor(json):
-    type = json["type"]
+    global os_type
+    if platform == "linux" or platform == "linux2":
+        print("linux")
+        os_type = OS_TYPE.LINUX
+    elif platform == "darwin":
+        print("mac")
+        os_type = OS_TYPE.MAC
+    elif platform == "win32":
+        print("windows")
+        os_type = OS_TYPE.WINDOWS
+        
+    json_type = json["type"]
     params = json["parameters"]
     if json["type"] == "fileupload":
         print("fileupload Received")
@@ -15,36 +37,81 @@ def jsonProcessor(json):
     elif json["type"] == "appshutdown":
         print("appshutdown Received")
         agent_logger.info("Attempting to stop application with name: {} and PID: {}.".format(params["app_name"], params["app_id"]))
-        return "appshutdown"
-       #agent_logger.info("Application with details: ({},{}) stopped.".format(params["app_name"], params["app_id"]))     
+        return appshutdown(params)
     elif json["type"] == "restartapp":
         print("appshutdown Received")
         agent_logger.info("Attempting to restart application with name: {} and PID: {}.".format(params["app_name"], params["app_id"]))
-        return "restartapp"
-       #agent_logger.info("Application with details: ({},{}) restarted.".format(params["app_name"], params["app_id"]))    
+        return apprestart(params)
     elif json["type"] == "shutdownmachine":
         print("shutdownmachine Received")
         agent_logger.info("Attempting to shutdown machine {} .".format(json["machine_name"]))
-        return shutdown(json)
+        return "Shutting Down Machine"
+        # return shutdown(json)
     elif json["type"] == "restartmachine":
         print("restartmachine Received")
         agent_logger.info("Attempting to restart machine {} .".format(json["machine_name"]))
-        return restart_command(json)
+        return "Restarted Machine"
+        # return restart(json)
     elif json["type"] == "custom_command":
         print("custom Received")
-        agent_logger.info("Attempting to run the command: {} on machine: {}.".format(params["custom_command"], params["machine_name"]))
+        agent_logger.info("Attempting to run the command: {} on machine: {}.".format(params["custom_command"], json["machine_name"]))
         return shellProcessor(params)
           
+
+def appshutdown(params):
+    pid = params['app_id']
+    name = params['app_name']
+    try:
+        process = psutil.Process(pid)
+    except:
+        return f"ID:{pid} not found"
+    result = killpid(name, pid, process)
+    agent_logger.info("Application with details: ({},{}) stopped.".format(pid, name)) 
+    return result
+
+def apprestart(params):
+    pid = params['app_id']
+    name = params['app_name']
+    try:
+        process = psutil.Process(pid)
+    except:
+        return f"ID:{pid} not found"
+    exe_path = process.exe()
+    result = killpid(name, pid, process)
+    thread = (threading.Thread(target = thread_run_process, args=[exe_path, ""], daemon=True))
+    thread.start()
+    agent_logger.info("Application with details: ({},{}) restarted.".format(pid, name)) 
+    return result
+
+def killpid(name, pid, process):
+    result = ""
+    if process != None:
+        process.kill()
+        result = f"Process {name} with ID:{pid} terminated successfully."
+    else:
+        result = f"No process with ID:{pid} found."
+    return result
+
 def shutdown(json):
-    os.system("shutdown /s /t 0")
+    time.sleep(5)
+    global os_type
+    if os_type == OS_TYPE.WINDOWS:
+        os.system("shutdown /s /t 0")
+    else: #Linux and Mac
+        os.system("sudo shutdown -h now")
     agent_logger.info("Machine Shutdown: {} .".format(json["machine_name"]))
     return "Shutdown Initiated."
+        
+def restart(json):
+    time.sleep(5)
+    global os_type
+    if os_type == OS_TYPE.WINDOWS:
+        os.system("shutdown /r /t 0")
+    else: #Linux and Mac
+        os.system("sudo shutdown -r now")
+    agent_logger.info("Machine Restarted: {} .".format(json["machine_name"]))
+    return "Restart Initiated."
 
-def restart_command(json):
-    print("JSON Command Processor")
-    agent_logger.info("Restarted machine {} .".format(json["machine_name"]))
-    return "Reset Initiated."
-    
 def fileProcessor(params):
     print("File Processor")
     #print(commandJson)
@@ -61,21 +128,66 @@ def fileProcessor(params):
     agent_logger.info("File: uploaded at destination: {}.".format(destination))
     return result
 
-def shellProcessor(json):
-  print("Custom command")
-  params = json["parameters"]
-  command = params['command']
-  if type == "shell":
+
+thread = None
+threadOutput = ""
+def thread_run_process(command, shell):
+    print("Shell Type:")
+    print(shell)
+    ps_command = command
+    global os_type
+    if os_type == OS_TYPE.WINDOWS:
+        if shell == "powershell":
+            ps_command = ["powershell","-Command"]
+            ps_command.append(command)
+        if shell == "wsl":
+            ps_command = "wsl " + command
+    else: #Linux and Mac
+        print("Linux")
+    
+    print(ps_command)
+    #result = subprocess.run(command, stdout=subprocess.PIPE, shell=True)
+    result = subprocess.run(ps_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    print(result.stdout.decode('ascii'))
+    print(result.stderr.decode('ascii'))
+    global threadOutput
+    threadOutput = "stdout:\n" + result.stdout.decode('ascii') + "\nstderr:\n" + result.stderr.decode('ascii')
+    print("Thread End")
+
+
+def shellProcessor(params):
+    print("Shell command")
+    #print(commandJson)
+    shell = "cmd"
+    if "shell" in params:
+        shell = params['shell']
+    command = params['custom_command']
     print("Shell Command Received")
     print(command)
-    left = ""
-    right = ""
-    if ' ' in command:
-      pos = command.find(' ')+1
-      left, right = command[:pos], command[pos:]
-    else:
-      left = command
-    result = subprocess.run([left, right], capture_output=True).stdout.decode('utf-8')
-    print(result)
-    agent_logger.info("Custom Command ran sucessfully on machine {}.".format(json["machine_name"]))
-    return result
+    thread = (threading.Thread(target = thread_run_process, args=[command, shell], daemon=True))
+    thread.start()
+    time.sleep(5)
+    print("Main End")
+    global threadOutput
+    returnResult = threadOutput
+    threadOutput = ""
+    return returnResult
+
+
+
+
+
+
+
+    # def commandProcessor(params, os_type):
+#     print("JSON Command Processor")
+#     command = params['command']
+#     if command == "shutdown":
+#         print("Shutdown Initiated")
+#         shutdown()
+#         return "Shutdown Initiated."
+#     elif command == "reset" or command == "restart":
+#         print("Reset Initiated")
+#         restart()
+#         return "Reset Initiated."
+
