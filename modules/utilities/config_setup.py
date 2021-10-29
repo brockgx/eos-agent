@@ -58,7 +58,8 @@ def validate_config_details():
     #Validate sections
     all_items = {
       "SERVER-DETAILS": {"names": ["SERVER-ADDRESS","SERVER-PORT","PORT-ENABLED","HTTPS-ENABLED"], "types": [str,int,bool,bool]},
-      "SOCKET-DETAILS": {"names": ["MAIN-PORT","SECONDARY-PORT"], "types": [int,int]} 
+      "SOCKET-DETAILS": {"names": ["MAIN-PORT","SECONDARY-PORT","SOCKET-ADDRESS"], "types": [int,int,str]},
+      "GENERAL-DETAILS": {"names": ["DELAY-TIME","COLLECTION-INTERVAL","POST-INTERVAL"], "types": [int,int,int]} 
     }
     sections_valid = validate_sections(cfg, all_items)
     #Validate values
