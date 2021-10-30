@@ -1,13 +1,17 @@
 from os import path
 from platform import system
-import yaml
+import yaml, sys
 
 from .logging_setup import agent_logger
 #import yaml, os, platform
 
 def read_config_file():
   #Get the directory of the configuration file
-  CONFIG_DIR = path.abspath(path.join(__file__,"../../../"))
+  if getattr(sys, 'frozen', False):
+    CONFIG_DIR = path.dirname(sys.executable)
+  else:
+    CONFIG_DIR = path.abspath(path.join(__file__,"../../../"))
+    
   if system() == "Windows":
     CONFIG_PATH = CONFIG_DIR + "\\agent_config.yml"
   else:
@@ -54,7 +58,8 @@ def validate_config_details():
     #Validate sections
     all_items = {
       "SERVER-DETAILS": {"names": ["SERVER-ADDRESS","SERVER-PORT","PORT-ENABLED","HTTPS-ENABLED"], "types": [str,int,bool,bool]},
-      "SOCKET-DETAILS": {"names": ["MAIN-PORT","SECONDARY-PORT"], "types": [int,int]} 
+      "SOCKET-DETAILS": {"names": ["MAIN-PORT","SECONDARY-PORT","SOCKET-ADDRESS"], "types": [int,int,str]},
+      "GENERAL-DETAILS": {"names": ["DELAY-TIME","COLLECTION-INTERVAL","POST-INTERVAL"], "types": [int,int,int]} 
     }
     sections_valid = validate_sections(cfg, all_items)
     #Validate values

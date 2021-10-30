@@ -92,7 +92,7 @@ def thread_network_metrics():
         new_value = psutil.net_io_counters().bytes_sent + psutil.net_io_counters().bytes_recv
 
         if network_percent:
-            network_string = ("%d" % (new_value - network_percent))
+            network_string = ("%0.2f" % convert_to_gbit(new_value - network_percent))
 
         network_percent = new_value
 
