@@ -9,7 +9,8 @@ from enum import Enum
 import threading
 import time
 import psutil
-class OS_TYPE(Enum):
+
+class OS_TYPE(Enum): #Enum to determine the OS
     WINDOWS = 1
     LINUX = 2
     MAC = 3
@@ -17,7 +18,7 @@ class OS_TYPE(Enum):
 os_type = OS_TYPE.WINDOWS
 
 def jsonProcessor(json):
-    global os_type
+    global os_type #Function to identity the platform of the agent
     if platform == "linux" or platform == "linux2":
         print("linux")
         os_type = OS_TYPE.LINUX
@@ -27,7 +28,9 @@ def jsonProcessor(json):
     elif platform == "win32":
         print("windows")
         os_type = OS_TYPE.WINDOWS
-        
+
+
+    #Runs Specific functions based on the type information received from server and  returns the output of the function.   
     json_type = json["type"]
     params = json["parameters"]
     if json["type"] == "fileupload":
@@ -58,6 +61,7 @@ def jsonProcessor(json):
         return shellProcessor(params)
           
 
+#Shutdown App Function
 def appshutdown(params):
     pid = params['app_id']
     name = params['app_name']
@@ -69,6 +73,7 @@ def appshutdown(params):
     agent_logger.info("Application with details: ({},{}) stopped.".format(pid, name)) 
     return result
 
+#Restart App Function
 def apprestart(params):
     pid = params['app_id']
     name = params['app_name']
@@ -83,6 +88,7 @@ def apprestart(params):
     agent_logger.info("Application with details: ({},{}) restarted.".format(pid, name)) 
     return result
 
+#Killing a Process function
 def killpid(name, pid, process):
     result = ""
     if process != None:
@@ -92,6 +98,7 @@ def killpid(name, pid, process):
         result = f"No process with ID:{pid} found."
     return result
 
+#Shutting down a machine function
 def shutdown(json):
     time.sleep(5)
     global os_type
@@ -101,7 +108,8 @@ def shutdown(json):
         os.system("sudo shutdown -h now")
     agent_logger.info("Machine Shutdown: {} .".format(json["machine_name"]))
     return "Shutdown Initiated."
-        
+
+#Restarting a machine function
 def restart(json):
     time.sleep(5)
     global os_type
@@ -112,6 +120,7 @@ def restart(json):
     agent_logger.info("Machine Restarted: {} .".format(json["machine_name"]))
     return "Restart Initiated."
 
+#File Upload function
 def fileProcessor(params):
     print("File Processor")
     #print(commandJson)
@@ -129,6 +138,7 @@ def fileProcessor(params):
     return result
 
 
+#Thread function to manage shell commands
 thread = None
 threadOutput = ""
 def thread_run_process(command, shell):
@@ -152,12 +162,9 @@ def thread_run_process(command, shell):
     print(result.stderr.decode('ascii'))
     global threadOutput
     threadOutput = "stdout:\n" + result.stdout.decode('ascii') + "\nstderr:\n" + result.stderr.decode('ascii')
-    print("Thread End")
 
-
+# The custom command processer
 def shellProcessor(params):
-    print("Shell command")
-    #print(commandJson)
     shell = "cmd"
     if "shell" in params:
         shell = params['shell']
@@ -167,27 +174,7 @@ def shellProcessor(params):
     thread = (threading.Thread(target = thread_run_process, args=[command, shell], daemon=True))
     thread.start()
     time.sleep(5)
-    print("Main End")
     global threadOutput
     returnResult = threadOutput
     threadOutput = ""
     return returnResult
-
-
-
-
-
-
-
-    # def commandProcessor(params, os_type):
-#     print("JSON Command Processor")
-#     command = params['command']
-#     if command == "shutdown":
-#         print("Shutdown Initiated")
-#         shutdown()
-#         return "Shutdown Initiated."
-#     elif command == "reset" or command == "restart":
-#         print("Reset Initiated")
-#         restart()
-#         return "Reset Initiated."
-
