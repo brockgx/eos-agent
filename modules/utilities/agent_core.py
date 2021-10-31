@@ -31,7 +31,7 @@ def create_new_thread(target_function, target_args = ()):
 #Params: - None
 #Returned:
 #   - Dict/JSON object of the required machine details
-def get_agent_details(main_port, secondary_port):
+def get_agent_details(socket_address, main_port, secondary_port):
   return {
     "os_type": platform.system(),
     "os_details": platform.platform(),
@@ -39,7 +39,7 @@ def get_agent_details(main_port, secondary_port):
     "os_version": platform.version(),
     "processor_type": platform.processor(),
     "host_name": socket.gethostname(),
-    "ip_addr_v4": int(ipaddress.IPv4Address(socket.gethostbyname(socket.gethostname()))),
+    "ip_addr_v4": int(ipaddress.IPv4Address(socket_address)), #socket.gethostbyname(socket.gethostname())
     "port_numbers": [str(main_port),str(secondary_port)], 
     "mac_addr": get_mac_address()
   }
