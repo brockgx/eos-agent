@@ -8,8 +8,6 @@ from ..utilities.logging_setup import agent_logger
 from ..utilities.agent_core import print_log_msg, create_new_thread
 from .data_transfer import sendSocketData, receiveSocketData
 
-
-
 ## Functions ##
 #Function: To create a new socket via wrapper function
 #Params:
@@ -25,9 +23,9 @@ def create_socket(socket_ip, socket_port):
 #   - socket_port: the port number to use for the socket
 #Returned: - None
 def setup_socket_listener(socket_ip, socket_port):
-  new_socket = configure_socket(socket_ip, socket_port)
+  new_socket = configure_socket(socket_ip, socket_port) #Creates a new socket
   #Then run main function   
-  mainFunction(new_socket)
+  mainFunction(new_socket) # Main function to handle all incoming connections
   agent_logger.info("Socket is now listening on ({},{}).".format(socket_ip, socket_port))
 
 #Function: Generate the server socket
@@ -51,44 +49,30 @@ def configure_socket(socket_ip, socket_port):
     agent_logger.critical(err_msg)
     return False
 
-#Function: Accepting new connections to the sockets (could be combined with select)
-#Params:
-#   -  agent_socket: the socket object for connections
-#Returned: - None
-# def accept_new_connections(agent_socket):
-  
-#   #Get new connection
-#   conn, c_addr = agent_socket.accept()
-#   print_log_msg("New connection from: " + str(c_addr))
-#   return conn,c_addr
- 
-
   #Function: main function
 def mainFunction(sock):
   allSocketConnections = [sock]
   allSocketOutputs = []
   allMessageQueues = {}
 
-
   while allSocketConnections:
     agent_logger.info("Waiting for next socket event ({})...".format(sock.getsockname()[1]))
-    readable, writable, exceptional = select.select(allSocketConnections, allSocketOutputs, allSocketConnections)     #Not working after this.
+    readable, writable, exceptional = select.select(allSocketConnections, allSocketOutputs, allSocketConnections)    #Select Setup 
 
-    for read in readable:
+    for read in readable: #Receiving
       if read is sock:
-        connection, client_address = read.accept()
-        agent_logger.info("New connection accepted from: {}.".format(connection.getpeername()))
-        connection.setblocking(0)
-        allSocketConnections.append(connection)
-        allMessageQueues[connection] = queue.Queue()
+        connection, client_address = read.accept() #Accepts the connection
+        agent_logger.info("New connection accepted from: {}.".format(connection.getpeername())) #Logs it into the agent logger file
+        connection.setblocking(0) #Connecting Blocking set to 0
+        allSocketConnections.append(connection) #Adds socket connection to the list
+        allMessageQueues[connection] = queue.Queue() #Connection is now in queue
       else:
-        data = receiveSocketData(read)
+        data = receiveSocketData(read) #If connection is established, recevied data
         if data:
-          json_data = json.loads(data)
-          #agent_logger.info("Command data receieved {} from ({}).".format(data, read.getpeername()))
-
-          result = jsonProcessor(json_data)
-          allMessageQueues[read].put(result)
+          json_data = json.loads(data) #Loads data into the var
+          agent_logger.info("Command data receieved {} from ({}).".format(data, read.getpeername())) #Logs it to the agent logger file
+          result = jsonProcessor(json_data) #Running the command procressor function
+          allMessageQueues[read].put(result) #Adds the output to the messages queue to be displayed
 
           if read not in allSocketOutputs:
             allSocketOutputs.append(read)
@@ -100,12 +84,11 @@ def mainFunction(sock):
           read.close()
           del allMessageQueues[read]
 
-    for write in writable:
+    for write in writable: #Sending
       try:
         next_msg = allMessageQueues[write].get_nowait()
       except queue.Empty:
-        #agent_logger.warning("Output queue for {} is empty.".format(write.getpeername()))
-        allSocketOutputs.remove(write)
+        allSocketOutputs.remove(write) #if queue is empty removes the connection
       else:
         agent_logger.info("Sending {} to {}.".format(next_msg, write.getpeername()))
         sendSocketData(write, next_msg)

@@ -70,19 +70,18 @@ def send_agent_details(server_address_route, agent_details, retry_timer):
 
 #Function: Collect the machine data and send
 def data_processing(api_route, collection_interval, post_interval):
-  timeout = post_interval
+  timeout = post_interval #Gets the timeout value when function is ran
   while True:
-    timeout_start = datetime.timestamp(datetime.now())
+    timeout_start = datetime.timestamp(datetime.now()) #Starts the inital timeout value
     metrics = []
 
-    while datetime.timestamp(datetime.now()) < timeout_start + timeout:
-      data = json.loads(get_json())
-      #print(data)
-      metrics.append(data)
-      time.sleep(collection_interval)
+    while datetime.timestamp(datetime.now()) < timeout_start + timeout: #Runs till the assigned time is up
+      data = json.loads(get_json())  #Gets the JSON Data
+      metrics.append(data) #Adds it to the list
+      time.sleep(collection_interval) #Sleeps for assigned time
     
-    agent_logger.info("{} minutes has been reached sending data to {}.".format(round(post_interval/60), api_route))
-    requests.post(api_route, json={"content": metrics})
+    agent_logger.info("{} minutes has been reached sending data to {}.".format(round(post_interval/60), api_route)) #Printing the info on logger agent file.
+    requests.post(api_route, json={"content": metrics}) #posting the metrics to the api in a JSON format
 
 #Function: Thread Data collection
 def data_collection(api_route, coll_interval, post_interval):
