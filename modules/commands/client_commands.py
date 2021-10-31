@@ -18,7 +18,7 @@ class OS_TYPE(Enum): #Enum to determine the OS
 os_type = OS_TYPE.WINDOWS
 
 def jsonProcessor(json):
-    global os_type #Function to identity the platform of the agent
+    global os_type #Function to identify the platform of the agent
     if platform == "linux" or platform == "linux2":
         print("linux")
         os_type = OS_TYPE.LINUX
@@ -34,33 +34,24 @@ def jsonProcessor(json):
     json_type = json["type"]
     params = json["parameters"]
     if json["type"] == "fileupload":
-        print("fileupload Received")
         agent_logger.info("Attempting to upload the file at destination: {}.".format(params["destination"]))
         return fileProcessor(params)
     elif json["type"] == "appshutdown":
-        print("appshutdown Received")
         agent_logger.info("Attempting to stop application with name: {} and PID: {}.".format(params["app_name"], params["app_id"]))
         return appshutdown(params)
     elif json["type"] == "restartapp":
-        print("appshutdown Received")
         agent_logger.info("Attempting to restart application with name: {} and PID: {}.".format(params["app_name"], params["app_id"]))
         return apprestart(params)
     elif json["type"] == "shutdownmachine":
-        print("shutdownmachine Received")
         agent_logger.info("Attempting to shutdown machine {} .".format(json["machine_name"]))
-        return "Shutting Down Machine"
-        # return shutdown(json)
+        return shutdown(json)
     elif json["type"] == "restartmachine":
-        print("restartmachine Received")
         agent_logger.info("Attempting to restart machine {} .".format(json["machine_name"]))
-        return "Restarted Machine"
-        # return restart(json)
+        return restart(json)
     elif json["type"] == "custom_command":
-        print("custom Received")
         agent_logger.info("Attempting to run the command: {} on machine: {}.".format(params["custom_command"], json["machine_name"]))
         return shellProcessor(params)
           
-
 #Shutdown App Function
 def appshutdown(params):
     pid = params['app_id']
@@ -82,8 +73,9 @@ def apprestart(params):
     except:
         return f"ID:{pid} not found"
     exe_path = process.exe()
+    print(exe_path)
     result = killpid(name, pid, process)
-    thread = (threading.Thread(target = thread_run_process, args=[exe_path, ""], daemon=True))
+    thread = (threading.Thread(target = thread_run_process, args=[exe_path,"powershell"], daemon=True))
     thread.start()
     agent_logger.info("Application with details: ({},{}) restarted.".format(pid, name)) 
     return result
@@ -124,14 +116,14 @@ def restart(json):
 def fileProcessor(params):
     print("File Processor")
     #print(commandJson)
-    #file = params['file']
+    file = params['file']
     b64file = params['b64file']
     destination = params['destination']
     print("File Received")
-    #print(b64file)
-    # file = base64.b64decode(b64file)
-    # outFileHandle = open(destination, "wb")
-    # outFileHandle.write(file)
+    print(b64file)
+    file = base64.b64decode(b64file)
+    outFileHandle = open(destination, "wb")
+    outFileHandle.write(file)
     result = "File Written to " + destination
     print(result)
     agent_logger.info("File: uploaded at destination: {}.".format(destination))
@@ -169,7 +161,6 @@ def shellProcessor(params):
     if "shell" in params:
         shell = params['shell']
     command = params['custom_command']
-    print("Shell Command Received")
     print(command)
     thread = (threading.Thread(target = thread_run_process, args=[command, shell], daemon=True))
     thread.start()
@@ -177,4 +168,7 @@ def shellProcessor(params):
     global threadOutput
     returnResult = threadOutput
     threadOutput = ""
+    print("HERE")
+    agent_logger.info(returnResult)
+    print(returnResult)
     return returnResult
