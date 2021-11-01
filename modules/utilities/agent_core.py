@@ -8,20 +8,12 @@ from .logging_setup import agent_logger
 from ..metrics.client_metrics import get_json
 from ..metrics.client_metrics import start_agent as enable_data_collection
 
-## Functions ##
-#Function: Generate a structured message for printing to the console
-#Params:
-#   - msg: a string to be displayed
-#Returned: - None
-def print_log_msg(msg):
-  print("["+str(datetime.now())+"] "+ str(msg))
-
 #Function: Generate and start a new thread
 #Params:
 #   - target_function: the function the thread will run
 #   - target_args:     the corresponding function arguments
 #Returned:
-#   - None (the thread?? or add thread to a list for checking)
+#   - None
 def create_new_thread(target_function, target_args = ()):
   t = threading.Thread(target=target_function, args=target_args)
   t.daemon = True
@@ -53,22 +45,33 @@ def get_agent_details(socket_address, main_port, secondary_port):
 def send_agent_details(server_address_route, agent_details, retry_timer):
   agent_logger.info("Attempting to send the agent details to {}.".format(server_address_route))
   try:
+    #Send the details to the API
     api_result = requests.post(server_address_route, json=agent_details)
     if api_result.status_code == 200 and api_result.text == "Success":
+      #Successful result
       agent_logger.info("Agent details have successfully sent to {}.".format(server_address_route))
       return True
     elif api_result.status_code == 200:
+      #Status code error
       agent_logger.error("A connection to {} was established; however, an error occurred, re-trying in {} minutes.".format(server_address_route, round(retry_timer/60, 2)))
       agent_logger.error(str(api_result.text))
       return False
     else:
+      #Issue with the data on the backend
       agent_logger.error("Failure occurred: ({}) {}, retrying in {} minutes.".format(str(api_result.status_code), str(api_result.reason), round(retry_timer/60, 2)))
       return False
   except Exception as err:
+    #Cannot connect to the server
     agent_logger.error("Failed to connect to {}, re-trying in {} minutes.".format(server_address_route, round(retry_timer/60, 2)))
     return False
 
-#Function: Collect the machine data and send
+#Function: Send the machine metrics to the API
+#Params:
+#   - api_route: API route to send the message e.g. http://localhost:5000/metrics/commitmetrics
+#   - collection_interval: interval to collect data from the polling threads
+#   - post_interval: interval until data can be sent
+#Returned:
+#   - None
 def data_processing(api_route, collection_interval, post_interval):
   timeout = post_interval #Gets the timeout value when function is ran
   while True:
@@ -83,10 +86,18 @@ def data_processing(api_route, collection_interval, post_interval):
     agent_logger.info("{} minutes has been reached sending data to {}.".format(round(post_interval/60), api_route)) #Printing the info on logger agent file.
     requests.post(api_route, json={"content": metrics}) #posting the metrics to the api in a JSON format
 
-#Function: Thread Data collection
+#Function: Thread the data collection and sending
+#Params:
+#   - api_route: API route to send the message e.g. http://localhost:5000/metrics/commitmetrics
+#   - collection_interval: interval to collect data from the polling threads
+#   - post_interval: interval until data can be sent
+#Returned:
+#   - None
 def data_collection(api_route, coll_interval, post_interval):
+  #Start the data collection polls
   enable_data_collection()
   agent_logger.info("Data collection threads started")
   time.sleep(10)
+  #Create the thread that will run the collection and sending
   create_new_thread(data_processing, [api_route, coll_interval, post_interval])
   agent_logger.info("Data processing and sending thread started.")

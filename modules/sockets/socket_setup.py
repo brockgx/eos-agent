@@ -49,7 +49,10 @@ def configure_socket(socket_ip, socket_port):
     agent_logger.critical(err_msg)
     return False
 
-  #Function: main function
+#Function: To setup command handling and listening functionality
+#Params:
+#   - sock: the socket of the agent listener
+#Returned: - None
 def mainFunction(sock):
   allSocketConnections = [sock]
   allSocketOutputs = []
