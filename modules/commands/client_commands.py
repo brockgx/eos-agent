@@ -132,9 +132,9 @@ def fileProcessor(params):
     destination = params['destination']
     print("File Received")
     #print(b64file)
-    # file = base64.b64decode(b64file)
-    # outFileHandle = open(destination, "wb")
-    # outFileHandle.write(file)
+    file = base64.b64decode(b64file)
+    outFileHandle = open(destination, "wb")
+    outFileHandle.write(file)
     result = "File Written to " + destination
     print(result)
     agent_logger.info("File: uploaded at destination: {}.".format(destination))
