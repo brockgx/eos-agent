@@ -5,7 +5,7 @@ from modules.commands.client_commands import jsonProcessor
 
 #Import application specific modules
 from ..utilities.logging_setup import agent_logger
-from ..utilities.agent_core import print_log_msg, create_new_thread
+from ..utilities.agent_core import create_new_thread
 from .data_transfer import sendSocketData, receiveSocketData
 
 ## Functions ##
