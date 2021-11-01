@@ -97,7 +97,6 @@ def data_collection(api_route, coll_interval, post_interval):
   #Start the data collection polls
   enable_data_collection()
   agent_logger.info("Data collection threads started")
-  time.sleep(10)
-  #Create the thread that will run the collection and sending
+  time.sleep(1)
   create_new_thread(data_processing, [api_route, coll_interval, post_interval])
   agent_logger.info("Data processing and sending thread started.")
