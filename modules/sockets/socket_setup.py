@@ -70,7 +70,7 @@ def mainFunction(sock):
         data = receiveSocketData(read) #If connection is established, recevied data
         if data:
           json_data = json.loads(data) #Loads data into the var
-          agent_logger.info("Command data receieved {} from ({}).".format(data, read.getpeername())) #Logs it to the agent logger file
+          #agent_logger.info("Command data receieved {} from ({}).".format(data, read.getpeername())) #Logs it to the agent logger file
           result = jsonProcessor(json_data) #Running the command procressor function
           allMessageQueues[read].put(result) #Adds the output to the messages queue to be displayed
 
