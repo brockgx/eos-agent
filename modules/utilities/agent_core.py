@@ -87,6 +87,6 @@ def data_processing(api_route, collection_interval, post_interval):
 def data_collection(api_route, coll_interval, post_interval):
   enable_data_collection()
   agent_logger.info("Data collection threads started")
-  time.sleep(10)
+  time.sleep(1)
   create_new_thread(data_processing, [api_route, coll_interval, post_interval])
   agent_logger.info("Data processing and sending thread started.")
