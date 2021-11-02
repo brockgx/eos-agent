@@ -48,13 +48,13 @@ def jsonProcessor(json):
     elif json["type"] == "shutdownmachine":
         print("shutdownmachine Received")
         agent_logger.info("Attempting to shutdown machine {} .".format(json["machine_name"]))
-        return "Shutting Down Machine"
-        # return shutdown(json)
+        #return "Shutting Down Machine"
+        return shutdown(json)
     elif json["type"] == "restartmachine":
         print("restartmachine Received")
         agent_logger.info("Attempting to restart machine {} .".format(json["machine_name"]))
-        return "Restarted Machine"
-        # return restart(json)
+        #return "Restarted Machine"
+        return restart(json)
     elif json["type"] == "custom_command":
         print("custom Received")
         agent_logger.info("Attempting to run the command: {} on machine: {}.".format(params["custom_command"], json["machine_name"]))
