@@ -59,6 +59,9 @@ def jsonProcessor(json):
         print("custom Received")
         agent_logger.info("Attempting to run the command: {} on machine: {}.".format(params["custom_command"], json["machine_name"]))
         return shellProcessor(params)
+    elif json["type"] == "ping":
+        agent_logger.info("Pinging on machine: {}.".format(json["machine_name"]))
+        return "PING"
           
 
 #Shutdown App Function
@@ -129,9 +132,9 @@ def fileProcessor(params):
     destination = params['destination']
     print("File Received")
     #print(b64file)
-    # file = base64.b64decode(b64file)
-    # outFileHandle = open(destination, "wb")
-    # outFileHandle.write(file)
+    file = base64.b64decode(b64file)
+    outFileHandle = open(destination, "wb")
+    outFileHandle.write(file)
     result = "File Written to " + destination
     print(result)
     agent_logger.info("File: uploaded at destination: {}.".format(destination))

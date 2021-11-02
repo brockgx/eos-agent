@@ -5,7 +5,7 @@ from modules.commands.client_commands import jsonProcessor
 
 #Import application specific modules
 from ..utilities.logging_setup import agent_logger
-from ..utilities.agent_core import print_log_msg, create_new_thread
+from ..utilities.agent_core import create_new_thread
 from .data_transfer import sendSocketData, receiveSocketData
 
 ## Functions ##
@@ -49,7 +49,10 @@ def configure_socket(socket_ip, socket_port):
     agent_logger.critical(err_msg)
     return False
 
-  #Function: main function
+#Function: To setup command handling and listening functionality
+#Params:
+#   - sock: the socket of the agent listener
+#Returned: - None
 def mainFunction(sock):
   allSocketConnections = [sock]
   allSocketOutputs = []
@@ -70,7 +73,7 @@ def mainFunction(sock):
         data = receiveSocketData(read) #If connection is established, recevied data
         if data:
           json_data = json.loads(data) #Loads data into the var
-          #agent_logger.info("Command data receieved {} from ({}).".format(data, read.getpeername())) #Logs it to the agent logger file
+          agent_logger.info("Command data receieved {} from ({}).".format(data, read.getpeername())) #Logs it to the agent logger file
           result = jsonProcessor(json_data) #Running the command procressor function
           allMessageQueues[read].put(result) #Adds the output to the messages queue to be displayed
 
