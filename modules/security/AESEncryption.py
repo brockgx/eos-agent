@@ -19,11 +19,11 @@ def do_encrypt(Message):
     except IOError as err:
         print(err)
     KeyFileLines = KeyFile.read().splitlines()
-    KeyForEncryptionOfKey = (KeyFileLines[0])
-    IVForEncryptionOfIV = (KeyFileLines[1])
+    KeyForEncryptionOfKey = bytearray.fromhex(KeyFileLines[0])
+    IVForEncryptionOfIV = bytearray.fromhex(KeyFileLines[1])
     KeyFile.close()
     EncryptionMethod = AES.new(KeyForEncryptionOfKey, AES.MODE_CFB, IVForEncryptionOfIV)
-    EncryptedMessage = EncryptionMethod.encrypt(Message)
+    EncryptedMessage = EncryptionMethod.encrypt(Message.encode('utf-8'))
     return EncryptedMessage
 
 
@@ -35,8 +35,8 @@ def do_decrypt(Message):
     except IOError as err:
         print(err)
     KeyFileLines = KeyFile.read().splitlines()
-    KeyForDecryptionOfKey = (KeyFileLines[0])
-    IVForDecryptionOfIV = (KeyFileLines[1])
+    KeyForDecryptionOfKey = bytearray.fromhex(KeyFileLines[0])
+    IVForDecryptionOfIV = bytearray.fromhex(KeyFileLines[1])
     DecryptionMethod = AES.new(KeyForDecryptionOfKey, AES.MODE_CFB, IVForDecryptionOfIV)
     DecryptedKey = DecryptionMethod.decrypt(Message)
     return DecryptedKey
