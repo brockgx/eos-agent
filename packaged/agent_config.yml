@@ -1,0 +1,26 @@
+#A list of configuration options for the agent across three sections:
+#  - Server Details: details for creating the server endpoint to connect and send requests.
+#  - Socket details: details to setup the socket listeners on the agent.
+#  - General details: details specifying timing delays.
+SERVER-DETAILS:
+  #Can be an IP or FQDN to the server.
+  SERVER-ADDRESS: localhost
+  #The port number with which the server sits.
+  SERVER-PORT: 5000
+  #Disabled or enabled port within the endpoint (good for if FQDN includes the port).
+  PORT-ENABLED: true
+  #Either True or False (only true if the server has it enabled).
+  HTTPS-ENABLED: false
+SOCKET-DETAILS:
+  #The IP address for the socket listeners to be setup and
+  #the two ports to accompany them. 
+  SOCKET-ADDRESS: 127.0.0.1
+  MAIN-PORT: 1337
+  SECONDARY-PORT: 1338
+GENERAL-DETAILS:
+  #A set of timings, general delay time for retries.
+  #A time in which metrics are collected and then a 
+  #time where they are sent to the server periodically.
+  DELAY-TIME: 20
+  COLLECTION-INTERVAL: 10
+  POST-INTERVAL: 180
