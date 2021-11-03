@@ -73,8 +73,15 @@ def mainFunction(sock):
         data = receiveSocketData(read) #If connection is established, recevied data
         if data:
           json_data = json.loads(data) #Loads data into the var
-          agent_logger.info("Command data receieved {} from ({}).".format(data, read.getpeername())) #Logs it to the agent logger file
+          json_length = len(data)
+          print_data = json_data
+          if json_length > 2000:
+            print_data = "Json length too long, data truncated. Size: " + str(json_length) # Truncate output if json is too large
+          agent_logger.info("Command data receieved {} from ({}).".format(print_data, read.getpeername())) #Logs it to the agent logger file
+          
           result = jsonProcessor(json_data) #Running the command procressor function
+          if result is None:
+            result = "Error in json processor, check json input."
           allMessageQueues[read].put(result) #Adds the output to the messages queue to be displayed
 
           if read not in allSocketOutputs:
