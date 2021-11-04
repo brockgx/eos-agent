@@ -108,7 +108,7 @@ def shutdown(json):
     if os_type == OS_TYPE.WINDOWS:
         os.system("shutdown /s /t 0")
     else: #Linux and Mac
-        os.system("sudo shutdown -h now")
+        os.system("shutdown -h now")
     agent_logger.info("Machine Shutdown: {} .".format(json["machine_name"]))
     return "Shutdown Initiated."
 
@@ -119,7 +119,7 @@ def restart(json):
     if os_type == OS_TYPE.WINDOWS:
         os.system("shutdown /r /t 0")
     else: #Linux and Mac
-        os.system("sudo shutdown -r now")
+        os.system("shutdown -r now")
     agent_logger.info("Machine Restarted: {} .".format(json["machine_name"]))
     return "Restart Initiated."
 
