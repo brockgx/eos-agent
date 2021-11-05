@@ -12,6 +12,7 @@ class OS_TYPE(Enum): #Enum to determine the OS
     LINUX = 2
     MAC = 3
 
+# Set os_type to windows by default.
 os_type = OS_TYPE.WINDOWS
 
 def jsonProcessor(json):
@@ -27,39 +28,45 @@ def jsonProcessor(json):
         os_type = OS_TYPE.WINDOWS
 
 
-    #Runs Specific functions based on the type information received from server and  returns the output of the function.   
+    #Runs Specific functions based on the type information received from server and
+    # returns the output of the function.   
     json_type = json["type"]
     params = json["parameters"]
-    if json["type"] == "fileupload":
+    # File receiving.
+    if json_type == "fileupload":
         print("fileupload Received")
         agent_logger.info("Attempting to upload the file at destination: {}.".format(params["destination"]))
         return fileProcessor(params)
-    elif json["type"] == "appshutdown":
+    # Kill an app
+    elif json_type == "appshutdown":
         print("appshutdown Received")
         agent_logger.info("Attempting to stop application with name: {} and PID: {}.".format(params["app_name"], params["app_id"]))
         return appshutdown(params)
-    elif json["type"] == "restartapp":
+    # Restart an app
+    elif json_type == "restartapp":
         print("appshutdown Received")
         agent_logger.info("Attempting to restart application with name: {} and PID: {}.".format(params["app_name"], params["app_id"]))
         return apprestart(params)
-    elif json["type"] == "shutdownmachine":
+    # Shutdown the machine
+    elif json_type == "shutdownmachine":
         print("shutdownmachine Received")
         agent_logger.info("Attempting to shutdown machine {} .".format(json["machine_name"]))
-        #return "Shutting Down Machine"
         return shutdown(json)
-    elif json["type"] == "restartmachine":
+    # Restart the machine
+    elif json_type == "restartmachine":
         print("restartmachine Received")
         agent_logger.info("Attempting to restart machine {} .".format(json["machine_name"]))
-        #return "Restarted Machine"
         return restart(json)
-    elif json["type"] == "custom_command":
+    # Run commands on cmd/powershell/bash/wsl
+    elif json_type == "custom_command":
         print("custom Received")
         agent_logger.info("Attempting to run the command: {} on machine: {}.".format(params["custom_command"], json["machine_name"]))
         return shellProcessor(params)
-    elif json["type"] == "ping":
+    # Ping
+    elif json_type == "ping":
         agent_logger.info("Pinging on machine: {}.".format(json["machine_name"]))
         return "PING"
-          
+
 
 #Shutdown App Function
 def appshutdown(params):
