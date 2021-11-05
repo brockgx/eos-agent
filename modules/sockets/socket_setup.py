@@ -1,12 +1,16 @@
+#
+# Handles the setup of the socket listeners on the agent
+# as well as the functionality for sending and receiving on those sockets
+#
+
 #Import third party libraries
 import socket, time, select, queue, json
-
-from modules.commands.client_commands import jsonProcessor
 
 #Import application specific modules
 from ..utilities.logging_setup import agent_logger
 from ..utilities.agent_core import create_new_thread
 from .data_transfer import sendSocketData, receiveSocketData
+from modules.commands.client_commands import jsonProcessor
 
 ## Functions ##
 #Function: To create a new socket via wrapper function

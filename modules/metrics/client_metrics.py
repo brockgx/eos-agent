@@ -1,7 +1,5 @@
-import threading
-import time
-import json
-import psutil
+#Import third party modules
+import threading, time, json, psutil
 from getmac import get_mac_address
 
 list_current_processes = []
@@ -14,7 +12,6 @@ disk_write_string = ""
 disk_bytes_read = 0.0
 disk_read_string = ""
 disk_metrics_list = []
-#disk_metrics = None
 
 class application:
     def __init__(self, pid, name, cpu, ram):
@@ -51,7 +48,6 @@ def get_list_of_processes(list_processes):
                 list_processes.append(application(process_pid, process_name, round(proc.cpu_percent()/cpu_count,2), round(proc.memory_percent(),2)))
 
             
-        #print(process_name , ' ::: ', processID)
         except psutil.Error:
             pass
 
@@ -104,7 +100,6 @@ def thread_disk_metrics():
     global disk_bytes_read
     global disk_read_string
     while True:
-        #print(psutil.disk_io_counters(perdisk=True))
         write_bytes = psutil.disk_io_counters().write_bytes
         read_bytes = psutil.disk_io_counters().read_bytes
 
@@ -114,13 +109,8 @@ def thread_disk_metrics():
         
         if disk_bytes_read:
             disk_read_string = ("%d" % (read_bytes - disk_bytes_read))
-        #print(disk_string)
 
         disk_bytes_write = write_bytes
-        #print("write:", end="")
-        #print(psutil.disk_io_counters().write_bytes)
-        #print("read:", end="")
-        #print(psutil.disk_io_counters().write_bytes)
         disk_bytes_read = read_bytes
 
         time.sleep(5)
@@ -165,8 +155,6 @@ def get_json():
         }
     }
     return json.dumps(x)
-
-#"disk_total_usage": disk_string,
 
 def start_agent():
     application_thread = threading.Thread(target = thread_application_metrics)

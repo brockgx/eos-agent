@@ -1,9 +1,15 @@
+#
+# Handles all the core functionalities for the agent
+# such as data retrieval and sending, and metric collecting and sending
+#
+
 #Import third party libraries
 import socket, threading, sys, platform, ipaddress, requests, time, json
-import ifcfg #needs pip install
+import ifcfg
 from datetime import datetime
 from getmac import get_mac_address
 
+#Import custom modules
 from .logging_setup import agent_logger
 from ..metrics.client_metrics import get_json
 from ..metrics.client_metrics import start_agent as enable_data_collection
@@ -84,7 +90,10 @@ def data_processing(api_route, collection_interval, post_interval):
       time.sleep(collection_interval) #Sleeps for assigned time
     
     agent_logger.info("{} minutes has been reached sending data to {}.".format(round(post_interval/60), api_route)) #Printing the info on logger agent file.
-    requests.post(api_route, json={"content": metrics}) #posting the metrics to the api in a JSON format
+    try:
+      requests.post(api_route, json={"content": metrics}) #posting the metrics to the api in a JSON format
+    except Exception as err_msg:
+      agent_logger.error("Failed to send metrics to the API")
 
 #Function: Thread the data collection and sending
 #Params:

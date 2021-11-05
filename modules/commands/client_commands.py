@@ -1,14 +1,11 @@
-import os
-import json
-import base64
-import subprocess
+#Import third party libraries
+import os, json, base64, subprocess
+import threading, time, psutil
 from sys import platform
-from ..utilities.logging_setup import agent_logger
-
 from enum import Enum
-import threading
-import time
-import psutil
+
+#Import any custom made modules
+from ..utilities.logging_setup import agent_logger
 
 class OS_TYPE(Enum): #Enum to determine the OS
     WINDOWS = 1
@@ -125,18 +122,12 @@ def restart(json):
 
 #File Upload function
 def fileProcessor(params):
-    print("File Processor")
-    #print(commandJson)
-    #file = params['file']
     b64file = params['b64file']
     destination = params['destination']
-    print("File Received")
-    #print(b64file)
     file = base64.b64decode(b64file)
     outFileHandle = open(destination, "wb")
     outFileHandle.write(file)
     result = "File Written to " + destination
-    print(result)
     agent_logger.info("File: uploaded at destination: {}.".format(destination))
     return result
 
@@ -145,8 +136,6 @@ def fileProcessor(params):
 thread = None
 threadOutput = ""
 def thread_run_process(command, shell):
-    print("Shell Type:")
-    print(shell)
     ps_command = command
     global os_type
     if os_type == OS_TYPE.WINDOWS:
@@ -158,8 +147,6 @@ def thread_run_process(command, shell):
     else: #Linux and Mac
         print("Linux")
     
-    print(ps_command)
-    #result = subprocess.run(command, stdout=subprocess.PIPE, shell=True)
     result = subprocess.run(ps_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     print(result.stdout.decode('ascii'))
     print(result.stderr.decode('ascii'))
@@ -172,8 +159,6 @@ def shellProcessor(params):
     if "shell" in params:
         shell = params['shell']
     command = params['custom_command']
-    print("Shell Command Received")
-    print(command)
     thread = (threading.Thread(target = thread_run_process, args=[command, shell], daemon=True))
     thread.start()
     time.sleep(5)
