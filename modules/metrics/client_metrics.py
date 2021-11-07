@@ -166,9 +166,10 @@ def get_json():
     app_metrics = []
     disk_metrics = []
     rangeCount = len(list_current_processes_sorted)
-    max = 10
-    if rangeCount > max:
-        rangeCount = 10
+    #Used to limit the applicatin entries returned
+    #max = 10
+    #if rangeCount > max:
+    #    rangeCount = 10
     for i in range(rangeCount):
         app_metrics.append(list_current_processes_sorted[i].to_dict())
     for i in range(len(disk_metrics_list)):
